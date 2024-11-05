@@ -144,12 +144,12 @@ class ParserContainer : public ParserContainerBase
       */
       void push_back(const T & t)
       {
-         // if(mParsers.size() + 1 > mParsers.capacity()) {
-         //    size_t newCapacity = (mParsers.capacity() == 0) ?
-         //                         1 : mParsers.capacity() * 2;
-         //    mParsers.reserve(newCapacity);
-         //
-         // }
+         if(mParsers.size() + 1 > mParsers.capacity()) {
+            size_t newCapacity = (mParsers.capacity() == 0) ?
+                                 1 : mParsers.capacity() * 2;
+            mParsers.reserve(newCapacity);
+
+         }
          mParsers.emplace_back(makeParser(t));
       }
 
