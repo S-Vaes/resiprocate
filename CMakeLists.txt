@@ -174,7 +174,7 @@ option(BUILD_SHARED_LIBS "Build libraries as shared" ${BUILD_SHARED_LIBS_DEFAULT
 option(USE_CONTRIB "Use libraries from contrib folder" ${USE_CONTRIB_DEFAULT})
 option(USE_NUGET "Use NuGet package manager" ${USE_NUGET_DEFAULT})
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 if(BUILD_TESTING)
     enable_testing()
@@ -283,7 +283,7 @@ else()
    # Put the resip ares include dir before the system ones to not conflict with
    # c-ares if also present.
    include_directories(BEFORE rutil/dns/ares)
-   
+
    set(ARES_LIBRARIES resipares)
 endif()
 

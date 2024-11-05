@@ -5,6 +5,7 @@
 #include <iosfwd>
 #include "resip/stack/HeaderTypes.hxx"
 #include <vector>
+#include <utility>
 
 #include "rutil/StlPoolAllocator.hxx"
 #include "rutil/PoolBase.hxx"
@@ -61,7 +62,7 @@ class ParserContainerBase
       inline void clear() {freeParsers(); mParsers.clear();}
 
       /**
-        @brief pure virtual function to be implemented in derived classes 
+        @brief pure virtual function to be implemented in derived classes
          with the intention of cloning this object
         */
       virtual ParserContainerBase* clone() const = 0;
@@ -78,10 +79,10 @@ class ParserContainerBase
       inline bool empty() const {return mParsers.empty();}
 
       /**
-        @internal 
+        @internal
         @brief the actual mechanics of parsing
-        @todo add support for headers that are allowed to be empty like 
-         Supported, Accept-Encoding, Allow-Events, Allow, Accept, 
+        @todo add support for headers that are allowed to be empty like
+         Supported, Accept-Encoding, Allow-Events, Allow, Accept,
          Accept-Language
         */
       EncodeStream& encode(const Data& headerName, EncodeStream& str) const;
@@ -110,14 +111,14 @@ class ParserContainerBase
 
       /**
         @brief append the vector to the mParsers vector held locally
-        @param rhs is the vector whose elements will be added to the 
+        @param rhs is the vector whose elements will be added to the
          local mParsers vector
         */
       void append(const ParserContainerBase& rhs);
 
       /**
         @brief pure virtual function to be implemented in derived classes
-         The intention is to provide an ability to parse all elements 
+         The intention is to provide an ability to parse all elements
          in the mParsers vector.
         */
       virtual void parseAll()=0;
@@ -129,16 +130,18 @@ class ParserContainerBase
 
       /**
          @internal
-      */
+       */
       class HeaderKit
       {
          public:
             static const HeaderKit Empty;
 
-            HeaderKit(): pc(0){}
+         HeaderKit(): pc(0), hfv() {}
+
+         HeaderKit(ParserCategory* p): pc(p), hfv() {}
 
             // Poor man's move c'tor, watch out!
-            HeaderKit(const HeaderKit& orig) 
+            HeaderKit(const HeaderKit& orig)
             : pc(orig.pc),
                hfv(orig.hfv)
             {
@@ -146,7 +149,7 @@ class ParserContainerBase
                std::swap(nc_orig.pc, pc);
                hfv.swap(nc_orig.hfv);
             }
- 
+
             // Poor man's move semantics, watch out!
             HeaderKit& operator=(const HeaderKit& rhs)
             {
@@ -158,10 +161,9 @@ class ParserContainerBase
                }
                return *this;
             }
-            
-            ~HeaderKit()
-            {}
-            
+
+         ~HeaderKit() {}
+
             EncodeStream& encode(EncodeStream& str) const
             {
                if(pc)
@@ -174,18 +176,18 @@ class ParserContainerBase
                }
                return str;
             }
-            
+
             ParserCategory* pc;
             HeaderFieldValue hfv;
       };
 
-      typedef std::vector<HeaderKit, StlPoolAllocator<HeaderKit, PoolBase> > Parsers;
+      typedef std::vector<HeaderKit> Parsers;
       /**
         @brief the actual list (vector) of parsers on which encoding is done
         */
       Parsers mParsers;
       PoolBase* mPool;
-      
+
       /**
         @brief copy header kits
         */
@@ -195,7 +197,7 @@ class ParserContainerBase
         @brief free parser containers
         */
       void freeParsers();
-      
+
       inline void freeParser(HeaderKit& kit)
       {
          if(kit.pc)
@@ -218,29 +220,29 @@ class ParserContainerBase
          return orig.clone(mPool);
       }
 };
- 
+
 }
 
 #endif
 
 /* ====================================================================
- * The Vovida Software License, Version 1.0 
- * 
+ * The Vovida Software License, Version 1.0
+ *
  * Copyright (c) 2023 SIP Spectrum, Inc. www.sipspectrum.com
  * Copyright (c) 2000-2005
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 
+ *
  * 3. The names "VOCAL", "Vovida Open Communication Application Library",
  *    and "Vovida Open Communication Application Library (VOCAL)" must
  *    not be used to endorse or promote products derived from this
@@ -250,7 +252,7 @@ class ParserContainerBase
  * 4. Products derived from this software may not be called "VOCAL", nor
  *    may "VOCAL" appear in their name, without prior written
  *    permission of Vovida Networks, Inc.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
@@ -264,9 +266,9 @@ class ParserContainerBase
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
  * DAMAGE.
- * 
+ *
  * ====================================================================
- * 
+ *
  * This software consists of voluntary contributions made by Vovida
  * Networks, Inc. and many individuals on behalf of Vovida Networks,
  * Inc.  For more information on Vovida Networks, Inc., please see

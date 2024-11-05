@@ -24,14 +24,14 @@ ParserContainerBase::ParserContainerBase(const ParserContainerBase& rhs)
 ParserContainerBase::ParserContainerBase(Headers::Type type,
                                           PoolBase& pool)
    : mType(type),
-     mParsers(StlPoolAllocator<HeaderKit, PoolBase>(&pool)),
+     mParsers(),
      mPool(&pool)
 {}
 
 ParserContainerBase::ParserContainerBase(const ParserContainerBase& rhs,
                                           PoolBase& pool)
    : mType(rhs.mType),
-     mParsers(StlPoolAllocator<HeaderKit, PoolBase>(&pool)),
+     mParsers(),
      mPool(&pool)
 {
    copyParsers(rhs.mParsers);
@@ -55,42 +55,42 @@ ParserContainerBase::operator=(const ParserContainerBase& rhs)
 }
 
 void
-ParserContainerBase::pop_front() 
+ParserContainerBase::pop_front()
 {
    resip_assert(!mParsers.empty());
    freeParser(mParsers.front());
    mParsers.erase(mParsers.begin());
 }
- 
+
 void
-ParserContainerBase::pop_back() 
+ParserContainerBase::pop_back()
 {
    resip_assert(!mParsers.empty());
    freeParser(mParsers.back());
-   mParsers.pop_back(); 
+   mParsers.pop_back();
 }
 
 void
-ParserContainerBase::append(const ParserContainerBase& source) 
+ParserContainerBase::append(const ParserContainerBase& source)
 {
    copyParsers(source.mParsers);
 }
 
-EncodeStream& 
-ParserContainerBase::encode(const Data& headerName, 
+EncodeStream&
+ParserContainerBase::encode(const Data& headerName,
                             EncodeStream& str) const
 {
    // !jf! this is not strictly correct since some headers are allowed to
    // be empty: Supported, Accept-Encoding, Allow-Events, Allow,
-   // Accept,Accept-Language 
+   // Accept,Accept-Language
    if (!mParsers.empty())
    {
       if (!headerName.empty())
       {
          str << headerName << Symbols::COLON[0] << Symbols::SPACE[0];
       }
-         
-      for (Parsers::const_iterator i = mParsers.begin(); 
+
+      for (Parsers::const_iterator i = mParsers.begin();
            i != mParsers.end(); ++i)
       {
          if (i != mParsers.begin())
@@ -110,12 +110,12 @@ ParserContainerBase::encode(const Data& headerName,
 
       str << Symbols::CRLF;
    }
-         
+
    return str;
 }
 
 EncodeStream&
-ParserContainerBase::encodeEmbedded(const Data& headerName, 
+ParserContainerBase::encodeEmbedded(const Data& headerName,
                                     EncodeStream& str) const
 {
    resip_assert(!headerName.empty());
@@ -124,7 +124,7 @@ ParserContainerBase::encodeEmbedded(const Data& headerName,
    {
 
       bool first = true;
-      for (Parsers::const_iterator i = mParsers.begin(); 
+      for (Parsers::const_iterator i = mParsers.begin();
            i != mParsers.end(); ++i)
       {
          if (first)
@@ -148,7 +148,7 @@ ParserContainerBase::encodeEmbedded(const Data& headerName,
    return str;
 }
 
-void 
+void
 ParserContainerBase::copyParsers(const Parsers& parsers)
 {
    mParsers.reserve(mParsers.size() + parsers.size());
@@ -162,15 +162,15 @@ ParserContainerBase::copyParsers(const Parsers& parsers)
       if(p->pc)
       {
          kit.pc = makeParser(*(p->pc));
-      } 
-      else 
+      }
+      else
       {
          kit.hfv = p->hfv;
       }
    }
 }
 
-void 
+void
 ParserContainerBase::freeParsers()
 {
    for(Parsers::iterator p=mParsers.begin(); p!=mParsers.end(); ++p)
@@ -195,23 +195,23 @@ ParserContainerBase::getHeaderValueByIndex(size_t index, Data& headerValue) cons
 
 
 /* ====================================================================
- * The Vovida Software License, Version 1.0 
- * 
+ * The Vovida Software License, Version 1.0
+ *
  * Copyright (c) 2023 SIP Spectrum, Inc. www.sipspectrum.com
  * Copyright (c) 2005
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 
+ *
  * 3. The names "VOCAL", "Vovida Open Communication Application Library",
  *    and "Vovida Open Communication Application Library (VOCAL)" must
  *    not be used to endorse or promote products derived from this
@@ -221,7 +221,7 @@ ParserContainerBase::getHeaderValueByIndex(size_t index, Data& headerValue) cons
  * 4. Products derived from this software may not be called "VOCAL", nor
  *    may "VOCAL" appear in their name, without prior written
  *    permission of Vovida Networks, Inc.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
@@ -235,9 +235,9 @@ ParserContainerBase::getHeaderValueByIndex(size_t index, Data& headerValue) cons
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
  * DAMAGE.
- * 
+ *
  * ====================================================================
- * 
+ *
  * This software consists of voluntary contributions made by Vovida
  * Networks, Inc. and many individuals on behalf of Vovida Networks,
  * Inc.  For more information on Vovida Networks, Inc., please see

@@ -14,34 +14,34 @@ namespace resip
 
 class MasterProfile : public UserProfile
 {
-   public:  
-      
+   public:
+
       /// Creates an Indentity/Profile with no BaseProfile - this is the root of all profiles
-      MasterProfile();  
-      
+      MasterProfile();
+
       /// Default is "sip"
-      virtual void addSupportedScheme(const Data& scheme);          
+      virtual void addSupportedScheme(const Data& scheme);
       virtual bool isSchemeSupported(const Data& scheme) const;
       virtual void clearSupportedSchemes() noexcept;
 
       /// Defaults are: INVITE, ACK, CANCEL, OPTIONS, BYE, UPDATE
-      virtual void addSupportedMethod(const MethodTypes& method);   
-      virtual void removeSupportedMethod(const MethodTypes& method);   
+      virtual void addSupportedMethod(const MethodTypes& method);
+      virtual void removeSupportedMethod(const MethodTypes& method);
       virtual bool isMethodSupported(MethodTypes method) const;
       virtual Tokens getAllowedMethods() const;
       virtual Data getAllowedMethodsData() const;
 
       virtual void clearSupportedMethods() noexcept;
 
-      /// Default is none. Do not use to enable PRACK(100rel) support. 
-      virtual void addSupportedOptionTag(const Token& tag);        
+      /// Default is none. Do not use to enable PRACK(100rel) support.
+      virtual void addSupportedOptionTag(const Token& tag);
       virtual Tokens getUnsupportedOptionsTags(const Tokens& requiresOptionTags); // Returns list of unsupported option tags
       virtual Tokens getSupportedOptionTags() const;
       virtual void clearSupportedOptionTags() noexcept;
 
       typedef enum
       {
-         Never,     
+         Never,
          SupportedEssential,  // If UAS - Only use reliable provisionals if sending a body and far end supports
          Supported,           // If UAS - Always use reliable provisionals if far end supports
          Required             // If UAS - Always use reliable provisionals
@@ -58,18 +58,18 @@ class MasterProfile : public UserProfile
       // a really bad idea, as an answer must be generated; the offer cannot be
       // rejected. UPDATE should always be used for O/A exchanges once the
       // dialog is established.
-      // 
+      //
       // Invite/18x(offer)/PRACK(ans) also works
-      // 
-      // Invite(offer)/18x(ans)/PRACK(offer)/200P(ans) is supported, but not recommended.  
-      // The UAC MUST call provideOffer from the onAnswer callback in order to generate 
+      //
+      // Invite(offer)/18x(ans)/PRACK(offer)/200P(ans) is supported, but not recommended.
+      // The UAC MUST call provideOffer from the onAnswer callback in order to generate
       // the offer in the PRACK.
       //
       // Explicit limitations are:
       // - Overlapping reliable provisional responses that contain a body are not
       //   handled.
       //
-      // Note:  Using SupportedEssential is exactly the same as using Supported, 
+      // Note:  Using SupportedEssential is exactly the same as using Supported,
       //        SupportedEssential only effects UAS Prack implementation
       virtual void setUacReliableProvisionalMode(ReliableProvisionalMode mode) noexcept;
       virtual ReliableProvisionalMode getUacReliableProvisionalMode() const noexcept;
@@ -87,31 +87,31 @@ class MasterProfile : public UserProfile
       virtual ReliableProvisionalMode getUasReliableProvisionalMode() const noexcept;
 
       /// Default is application/sdp for INVITE, OPTIONS, PRACK and UPDATE Methods
-      virtual void addSupportedMimeType(const MethodTypes& method, const Mime& mimeType);      
-      virtual bool removeSupportedMimeType(const MethodTypes& method, const Mime& mimeType);      
+      virtual void addSupportedMimeType(const MethodTypes& method, const Mime& mimeType);
+      virtual bool removeSupportedMimeType(const MethodTypes& method, const Mime& mimeType);
       virtual bool isMimeTypeSupported(const MethodTypes& method, const Mime& mimeType);
       virtual Mimes getSupportedMimeTypes(const MethodTypes& method);
       virtual void clearSupportedMimeTypes(const MethodTypes& method);
       virtual void clearSupportedMimeTypes() noexcept;  // Clear for all Methods
 
       /// Default is no encoding
-      virtual void addSupportedEncoding(const Token& encoding);     
+      virtual void addSupportedEncoding(const Token& encoding);
       virtual bool isContentEncodingSupported(const Token& contentEncoding) const;
       virtual Tokens getSupportedEncodings() const;
       virtual void clearSupportedEncodings() noexcept;
 
       /// Default is all - if nothing is set, then all are allowed
-      virtual void addSupportedLanguage(const Token& lang);         
+      virtual void addSupportedLanguage(const Token& lang);
       virtual bool isLanguageSupported(const Tokens& lang) const;
       virtual Tokens getSupportedLanguages() const;
       virtual void clearSupportedLanguages() noexcept;
-      
+
       /// Default is to not send an Allow-Events header.
-      virtual void addAllowedEvent(const Token& event);         
+      virtual void addAllowedEvent(const Token& event);
       virtual bool isEventAllowed(const Tokens& event) const;
       virtual Tokens getAllowedEvents() const;
       virtual void clearAllowedEvents() noexcept;
-      
+
       ///enable/disable content validation
       virtual bool& validateContentEnabled() noexcept;
       virtual bool validateContentEnabled() const noexcept;
@@ -124,12 +124,12 @@ class MasterProfile : public UserProfile
       virtual bool& validateAcceptEnabled() noexcept;
       virtual bool validateAcceptEnabled() const noexcept;
 
-      ///Set this to allow the Registration Server to accept registration requests that contain 
+      ///Set this to allow the Registration Server to accept registration requests that contain
       ///a To Tag.
       virtual bool& allowBadRegistrationEnabled() noexcept;
       virtual bool allowBadRegistrationEnabled() const noexcept;
 
-           
+
       ///
       /// Used when receiving a REGISTER request, if the expires value in the request
       /// is less than this time, then dum will reject the message with a 423 and set the
@@ -149,7 +149,7 @@ class MasterProfile : public UserProfile
       virtual uint32_t serverRegistrationDefaultExpiresTime() const noexcept;
 
       ///Set this to include the RequestURI in merge request detection.
-      ///*!*!*!*!*!*! RED FLASHING LIGHT *!*!*!*!*!*! 
+      ///*!*!*!*!*!*! RED FLASHING LIGHT *!*!*!*!*!*!
       ///When false, DUM implements the policy that all RURIs that arrive are equivalent,
       ///so if a request forks and arives here with different RURIs, we reject all but one
       ///of them as merged requests. This makes sense for single-line endpoints.  Nodes
@@ -158,11 +158,11 @@ class MasterProfile : public UserProfile
       ///phones will want to carefully consider the edge case of a request that forks
       ///to more than one line - if you want only one line to ring, leave this false.
       ///If you want them all to ring, set it to true.
-      
+
       virtual bool& checkReqUriInMergeDetectionEnabled() noexcept;
       virtual bool checkReqUriInMergeDetectionEnabled() const noexcept;
 
-      /// Enabling this setting will allow the application layer to provide additional SIP responses, from class 4xx, 5xx, 6xx, 
+      /// Enabling this setting will allow the application layer to provide additional SIP responses, from class 4xx, 5xx, 6xx,
       /// that will lead to transaction termination instead of other failure effects like dialog termination, as defined by
       /// method Helper::determineFailureMessageEffect. (See header Helper.hxx for all transaction failure effects).
       /// A scenarui when this is useful is when, for a server subscription, a NOTIFY is responded with an error response due to a timeout
@@ -199,7 +199,7 @@ class MasterProfile : public UserProfile
       bool mValidateContentEnabled;
       bool mValidateContentLanguageEnabled;
       bool mValidateAcceptEnabled;
-      bool mAllowBadRegistrationEnabled;    
+      bool mAllowBadRegistrationEnabled;
       bool mCheckReqUriInMergeDetectionEnabled;
       ReliableProvisionalMode mUacReliableProvisionalMode;
       ReliableProvisionalMode mUasReliableProvisionalMode;
@@ -210,28 +210,28 @@ class MasterProfile : public UserProfile
       bool mAdditionalTransactionTerminatingResponsesEnabled;
       std::set<int> mAdditionalTransactionTerminatingResponsess;
 };
-   
+
 }
 
 #endif
 
 /* ====================================================================
- * The Vovida Software License, Version 1.0 
- * 
+ * The Vovida Software License, Version 1.0
+ *
  * Copyright (c) 2000 Vovida Networks, Inc.  All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 
+ *
  * 3. The names "VOCAL", "Vovida Open Communication Application Library",
  *    and "Vovida Open Communication Application Library (VOCAL)" must
  *    not be used to endorse or promote products derived from this
@@ -241,7 +241,7 @@ class MasterProfile : public UserProfile
  * 4. Products derived from this software may not be called "VOCAL", nor
  *    may "VOCAL" appear in their name, without prior written
  *    permission of Vovida Networks, Inc.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
@@ -255,13 +255,12 @@ class MasterProfile : public UserProfile
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
  * DAMAGE.
- * 
+ *
  * ====================================================================
- * 
+ *
  * This software consists of voluntary contributions made by Vovida
  * Networks, Inc. and many individuals on behalf of Vovida Networks,
  * Inc.  For more information on Vovida Networks, Inc., please see
  * <http://www.vovida.org/>.
  *
  */
-

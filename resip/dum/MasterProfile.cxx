@@ -8,11 +8,20 @@ using namespace resip;
 #define RESIPROCATE_SUBSYSTEM Subsystem::DUM
 
 
-// Be sure to look at the documentation of the accessors for 
-// the members being set by this constructor in the .hxx file 
+// Be sure to look at the documentation of the accessors for
+// the members being set by this constructor in the .hxx file
 // for the implications of these default values.
 
-MasterProfile::MasterProfile() : 
+MasterProfile::MasterProfile() :
+   mSupportedSchemes{},
+   mSupportedMethodTypes{},
+   mSupportedMethods{},
+   mSupportedOptionTags{},
+   mSupportedMimeTypes{},
+   mSupportedEncodings{},
+   mSupportedLanguages{},
+   mAllowedEvents{},
+
    mValidateContentEnabled(true),
    mValidateContentLanguageEnabled(false),
    mValidateAcceptEnabled(false),
@@ -37,35 +46,35 @@ MasterProfile::MasterProfile() :
    addSupportedMethod(OPTIONS);
    addSupportedMethod(BYE);
    addSupportedMethod(UPDATE);
-   addSupportedScheme(Symbols::Sip);  
+   addSupportedScheme(Symbols::Sip);
 }
 
-void 
+void
 MasterProfile::addSupportedScheme(const Data& scheme)
 {
    mSupportedSchemes.insert(scheme);
 }
 
-bool 
+bool
 MasterProfile::isSchemeSupported(const Data& scheme) const
 {
    return mSupportedSchemes.count(scheme) != 0;
 }
 
-void 
+void
 MasterProfile::clearSupportedSchemes() noexcept
 {
    mSupportedSchemes.clear();
 }
 
-void 
+void
 MasterProfile::addSupportedMethod(const MethodTypes& method)
 {
    mSupportedMethodTypes.insert(method);
    mSupportedMethods.push_back(Token(getMethodName(method)));
 }
 
-void 
+void
 MasterProfile::removeSupportedMethod(const MethodTypes& method)
 {
    mSupportedMethodTypes.erase(method);
@@ -83,13 +92,13 @@ MasterProfile::removeSupportedMethod(const MethodTypes& method)
    // clearSupportedMimeTypes(method);
 }
 
-bool 
+bool
 MasterProfile::isMethodSupported(MethodTypes method) const
 {
    return mSupportedMethodTypes.count(method) != 0;
 }
 
-Tokens 
+Tokens
 MasterProfile::getAllowedMethods() const
 {
    return mSupportedMethods;
@@ -99,7 +108,7 @@ Data
 MasterProfile::getAllowedMethodsData() const
 {
    Data result;
-   
+
    for (Tokens::const_iterator i = mSupportedMethods.begin();
         i != mSupportedMethods.end(); ++i)
    {
@@ -109,18 +118,18 @@ MasterProfile::getAllowedMethodsData() const
       }
       result += i->value();
    }
-   
+
    return result;
 }
 
-void 
+void
 MasterProfile::clearSupportedMethods() noexcept
 {
    mSupportedMethodTypes.clear();
    mSupportedMethods.clear();
 }
 
-void 
+void
 MasterProfile::addSupportedOptionTag(const Token& tag)
 {
    if (tag == Token(Symbols::C100rel))
@@ -131,7 +140,7 @@ MasterProfile::addSupportedOptionTag(const Token& tag)
    mSupportedOptionTags.push_back(tag);
 }
 
-Tokens 
+Tokens
 MasterProfile::getUnsupportedOptionsTags(const Tokens& requiresOptionTags)
 {
    Tokens tokens;
@@ -154,17 +163,17 @@ MasterProfile::getUnsupportedOptionsTags(const Tokens& requiresOptionTags)
          tokens.push_back(*i);
       }
    }
-   
+
    return tokens;
 }
 
-Tokens 
+Tokens
 MasterProfile::getSupportedOptionTags() const
 {
    return mSupportedOptionTags;
 }
 
-void 
+void
 MasterProfile::clearSupportedOptionTags() noexcept
 {
    mSupportedOptionTags.clear();
@@ -194,13 +203,13 @@ MasterProfile::getUasReliableProvisionalMode() const noexcept
    return mUasReliableProvisionalMode;
 }
 
-void 
+void
 MasterProfile::addSupportedMimeType(const MethodTypes& method, const Mime& mimeType)
 {
    mSupportedMimeTypes[method].push_back(mimeType);
 }
 
-bool 
+bool
 MasterProfile::removeSupportedMimeType(const MethodTypes& method, const Mime& mimeType)
 {
    std::map<MethodTypes, Mimes>::iterator foundMethod = mSupportedMimeTypes.find(method);
@@ -219,80 +228,80 @@ MasterProfile::removeSupportedMimeType(const MethodTypes& method, const Mime& mi
    return false;
 }
 
-bool 
+bool
 MasterProfile::isMimeTypeSupported(const MethodTypes& method, const Mime& mimeType)
 {
    if(!mimeType.isWellFormed())
    {
       return false;
    }
-   
-   std::map<MethodTypes, Mimes>::iterator found = mSupportedMimeTypes.find(method); 
-   if (found != mSupportedMimeTypes.end()) 
-   { 
-      return found->second.find(mimeType); 
-   } 
-   return false; 
+
+   std::map<MethodTypes, Mimes>::iterator found = mSupportedMimeTypes.find(method);
+   if (found != mSupportedMimeTypes.end())
+   {
+      return found->second.find(mimeType);
+   }
+   return false;
 }
 
-Mimes 
+Mimes
 MasterProfile::getSupportedMimeTypes(const MethodTypes& method)
 {
-   std::map<MethodTypes, Mimes>::iterator found = mSupportedMimeTypes.find(method); 
-   if (found != mSupportedMimeTypes.end()) 
-   { 
-      return found->second; 
-   } 
-   return Mimes(); 
+   std::map<MethodTypes, Mimes>::iterator found = mSupportedMimeTypes.find(method);
+   if (found != mSupportedMimeTypes.end())
+   {
+      return found->second;
+   }
+   return Mimes();
 }
 
-void 
+void
 MasterProfile::clearSupportedMimeTypes(const MethodTypes& method)
 {
-   std::map<MethodTypes, Mimes>::iterator found = mSupportedMimeTypes.find(method); 
-   if (found != mSupportedMimeTypes.end()) 
-   { 
-      found->second.clear(); 
-   } 
+   std::map<MethodTypes, Mimes>::iterator found = mSupportedMimeTypes.find(method);
+   if (found != mSupportedMimeTypes.end())
+   {
+      found->second.clear();
+   }
 }
 
-void 
+void
 MasterProfile::clearSupportedMimeTypes() noexcept
 {
    mSupportedMimeTypes.clear();
 }
 
-void 
+void
 MasterProfile::addSupportedEncoding(const Token& encoding)
 {
    mSupportedEncodings.push_back(encoding);
 }
 
-bool 
+bool
 MasterProfile::isContentEncodingSupported(const Token& encoding) const
 {
    return encoding.isWellFormed() && mSupportedEncodings.find(encoding);
 }
 
-Tokens 
+Tokens
 MasterProfile::getSupportedEncodings() const
 {
    return mSupportedEncodings;
 }
 
-void 
+void
 MasterProfile::clearSupportedEncodings() noexcept
 {
    mSupportedEncodings.clear();
 }
 
-void 
+void
 MasterProfile::addSupportedLanguage(const Token& lang)
 {
    mSupportedLanguages.push_back(lang);
 }
 
-bool 
+bool
 MasterProfile::isLanguageSupported(const Tokens& langs) const
 {
    for (Tokens::const_iterator i=langs.begin(); i != langs.end(); ++i)
@@ -305,25 +314,25 @@ MasterProfile::isLanguageSupported(const Tokens& langs) const
    return true;
 }
 
-Tokens 
+Tokens
 MasterProfile::getSupportedLanguages() const
 {
    return mSupportedLanguages;
 }
 
-void 
+void
 MasterProfile::clearSupportedLanguages() noexcept
 {
    mSupportedLanguages.clear();
 }
 
-void 
+void
 MasterProfile::addAllowedEvent(const Token& event)
 {
    mAllowedEvents.push_back(event);
 }
 
-bool 
+bool
 MasterProfile::isEventAllowed(const Tokens& events) const
 {
    for (Tokens::const_iterator i=events.begin(); i != events.end(); ++i)
@@ -336,74 +345,74 @@ MasterProfile::isEventAllowed(const Tokens& events) const
    return true;
 }
 
-Tokens 
+Tokens
 MasterProfile::getAllowedEvents() const
 {
    return mAllowedEvents;
 }
 
-void 
+void
 MasterProfile::clearAllowedEvents() noexcept
 {
    mAllowedEvents.clear();
 }
 
-bool& 
+bool&
 MasterProfile::validateContentEnabled() noexcept
 {
-   return mValidateContentEnabled;   
+   return mValidateContentEnabled;
 }
 
-bool 
+bool
 MasterProfile::validateContentEnabled() const noexcept
 {
-   return mValidateContentEnabled;   
+   return mValidateContentEnabled;
 }
 
-bool& 
+bool&
 MasterProfile::validateContentLanguageEnabled() noexcept
 {
-   return mValidateContentLanguageEnabled;   
+   return mValidateContentLanguageEnabled;
 }
 
-bool 
+bool
 MasterProfile::validateContentLanguageEnabled() const noexcept
 {
-   return mValidateContentLanguageEnabled;   
+   return mValidateContentLanguageEnabled;
 }
 
-bool& 
+bool&
 MasterProfile::validateAcceptEnabled() noexcept
 {
-   return mValidateAcceptEnabled;   
+   return mValidateAcceptEnabled;
 }
 
-bool 
+bool
 MasterProfile::validateAcceptEnabled() const noexcept
 {
-   return mValidateAcceptEnabled;   
+   return mValidateAcceptEnabled;
 }
 
-bool 
+bool
 MasterProfile::allowBadRegistrationEnabled() const noexcept
 {
-   return mAllowBadRegistrationEnabled;   
+   return mAllowBadRegistrationEnabled;
 }
 
-bool& 
+bool&
 MasterProfile::allowBadRegistrationEnabled() noexcept
 {
-   return mAllowBadRegistrationEnabled;   
+   return mAllowBadRegistrationEnabled;
 }
 
-  
+
 uint32_t &
 MasterProfile::serverRegistrationMinExpiresTime() noexcept
 {
    return mServerRegistrationMinExpires;
 }
 
-uint32_t 
+uint32_t
 MasterProfile::serverRegistrationMinExpiresTime() const noexcept
 {
    return mServerRegistrationMinExpires;
@@ -415,7 +424,7 @@ MasterProfile::serverRegistrationMaxExpiresTime() noexcept
    return mServerRegistrationMaxExpires;
 }
 
-uint32_t 
+uint32_t
 MasterProfile::serverRegistrationMaxExpiresTime() const noexcept
 {
    return mServerRegistrationMaxExpires;
@@ -427,22 +436,22 @@ MasterProfile::serverRegistrationDefaultExpiresTime() noexcept
    return mServerRegistrationDefaultExpires;
 }
 
-uint32_t 
+uint32_t
 MasterProfile::serverRegistrationDefaultExpiresTime() const noexcept
 {
    return mServerRegistrationDefaultExpires;
 }
 
-bool 
+bool
 MasterProfile::checkReqUriInMergeDetectionEnabled() const noexcept
 {
-   return mCheckReqUriInMergeDetectionEnabled;   
+   return mCheckReqUriInMergeDetectionEnabled;
 }
 
-bool& 
+bool&
 MasterProfile::checkReqUriInMergeDetectionEnabled() noexcept
 {
-   return mCheckReqUriInMergeDetectionEnabled;   
+   return mCheckReqUriInMergeDetectionEnabled;
 }
 
 UserProfile*
@@ -486,22 +495,22 @@ void MasterProfile::clearAdditionalTransactionTerminatingResponses() noexcept
 }
 
 /* ====================================================================
- * The Vovida Software License, Version 1.0 
- * 
+ * The Vovida Software License, Version 1.0
+ *
  * Copyright (c) 2000 Vovida Networks, Inc.  All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 
+ *
  * 3. The names "VOCAL", "Vovida Open Communication Application Library",
  *    and "Vovida Open Communication Application Library (VOCAL)" must
  *    not be used to endorse or promote products derived from this
@@ -511,7 +520,7 @@ void MasterProfile::clearAdditionalTransactionTerminatingResponses() noexcept
  * 4. Products derived from this software may not be called "VOCAL", nor
  *    may "VOCAL" appear in their name, without prior written
  *    permission of Vovida Networks, Inc.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
@@ -525,13 +534,12 @@ void MasterProfile::clearAdditionalTransactionTerminatingResponses() noexcept
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
  * DAMAGE.
- * 
+ *
  * ====================================================================
- * 
+ *
  * This software consists of voluntary contributions made by Vovida
  * Networks, Inc. and many individuals on behalf of Vovida Networks,
  * Inc.  For more information on Vovida Networks, Inc., please see
  * <http://www.vovida.org/>.
  *
  */
-

@@ -1,0 +1,11 @@
+diff -ur a/include/cajun/json/reader.inl b/include/cajun/json/reader.inl
+--- a/include/cajun/json/reader.inl
++++ b/include/cajun/json/reader.inl
+@@ -30,6 +30,7 @@
+ #include <cassert>
+ #include <set>
+ #include <sstream>
++#include <cstdint>
+ 
+ /*  
+ 
