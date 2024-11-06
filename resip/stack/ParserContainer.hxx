@@ -165,25 +165,30 @@ class ParserContainer : public ParserContainerBase
       }
 
       typedef ParserContainerBase::Parsers Parsers;
-      // .dlb. these can be partially hoisted as well
-      class const_iterator;
+            class const_iterator;
 
-      /**
-         @brief An iterator class, derived from std::iterator (bidirectional)
-      */
-      class iterator : public std::iterator<std::bidirectional_iterator_tag, T>
+      class iterator
       {
          public:
-            iterator(typename Parsers::iterator i,ParserContainer* ref) : mIt(i),mRef(ref){}
+            // Iterator traits
+            using iterator_category = std::bidirectional_iterator_tag;
+            using value_type = T;
+            using difference_type = std::ptrdiff_t;
+            using pointer = T*;
+            using reference = T&;
+
+            iterator(typename Parsers::iterator i, ParserContainer* ref) : mIt(i), mRef(ref) {}
             iterator() : mRef(0) {}
             iterator(const iterator& orig) : mIt(orig.mIt), mRef(orig.mRef) {}
 
-            iterator operator++() {iterator it(++mIt,mRef); return it;}
-            iterator operator++(int) {iterator it(mIt++,mRef); return it;}
-            iterator operator--() {iterator it(--mIt,mRef); return it;}
-            iterator operator--(int) {iterator it(mIt--,mRef); return it;}
+            iterator& operator++() { ++mIt; return *this; }
+            iterator operator++(int) { iterator tmp(*this); ++mIt; return tmp; }
+            iterator& operator--() { --mIt; return *this; }
+            iterator operator--(int) { iterator tmp(*this); --mIt; return tmp; }
+
             friend bool operator!=(const iterator& lhs, const iterator& rhs) { return lhs.mIt != rhs.mIt; }
             friend bool operator==(const iterator& lhs, const iterator& rhs) { return lhs.mIt == rhs.mIt; }
+
             iterator& operator=(const iterator& rhs)
             {
                if (&rhs != this)
@@ -193,8 +198,10 @@ class ParserContainer : public ParserContainerBase
                }
                return *this;
             }
-            T& operator*() {return ensureInitialized(*mIt,mRef);}
-            T* operator->() {return &ensureInitialized(*mIt,mRef);}
+
+            reference operator*() { return ensureInitialized(*mIt, mRef); }
+            pointer operator->() { return &ensureInitialized(*mIt, mRef); }
+
          private:
             typename Parsers::iterator mIt;
             ParserContainer* mRef;
@@ -202,24 +209,29 @@ class ParserContainer : public ParserContainerBase
             friend class ParserContainer;
       };
 
-      /**
-         @brief A const_iterator class, derived from std::iterator
-            (bidirectional)
-      */
-      class const_iterator : public std::iterator<std::bidirectional_iterator_tag, T>
+      class const_iterator
       {
          public:
-            const_iterator(Parsers::const_iterator i,const ParserContainer* ref) : mIt(i),mRef(ref){}
+            // Iterator traits
+            using iterator_category = std::bidirectional_iterator_tag;
+            using value_type = T;
+            using difference_type = std::ptrdiff_t;
+            using pointer = const T*;
+            using reference = const T&;
+
+            const_iterator(Parsers::const_iterator i, const ParserContainer* ref) : mIt(i), mRef(ref) {}
             const_iterator(const const_iterator& orig) : mIt(orig.mIt), mRef(orig.mRef) {}
             const_iterator(const iterator& orig) : mIt(orig.mIt), mRef(orig.mRef) {}
             const_iterator() : mRef(0) {}
 
-            const_iterator operator++() {const_iterator it(++mIt,mRef); return it;}
-            const_iterator operator++(int) {const_iterator it(mIt++,mRef); return it;}
-            const_iterator operator--() {const_iterator it(--mIt,mRef); return it;}
-            const_iterator operator--(int) {const_iterator it(mIt--,mRef); return it;}
+            const_iterator& operator++() { ++mIt; return *this; }
+            const_iterator operator++(int) { const_iterator tmp(*this); ++mIt; return tmp; }
+            const_iterator& operator--() { --mIt; return *this; }
+            const_iterator operator--(int) { const_iterator tmp(*this); --mIt; return tmp; }
+
             friend bool operator!=(const const_iterator& lhs, const const_iterator& rhs) { return lhs.mIt != rhs.mIt; }
             friend bool operator==(const const_iterator& lhs, const const_iterator& rhs) { return lhs.mIt == rhs.mIt; }
+
             const_iterator& operator=(const const_iterator& rhs)
             {
                if (&rhs != this)
@@ -229,14 +241,17 @@ class ParserContainer : public ParserContainerBase
                }
                return *this;
             }
+
             const_iterator& operator=(const iterator& rhs)
             {
                mIt = rhs.mIt;
                mRef = rhs.mRef;
                return *this;
             }
-            const T& operator*() {return ensureInitialized(*mIt,mRef);}
-            const T* operator->() {return &ensureInitialized(*mIt,mRef);}
+
+            reference operator*() { return ensureInitialized(*mIt, mRef); }
+            pointer operator->() { return &ensureInitialized(*mIt, mRef); }
+
          private:
             friend class iterator;
             typename Parsers::const_iterator mIt;
