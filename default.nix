@@ -46,8 +46,8 @@ stdenv.mkDerivation rec {
 
   cmakeFlags = [
     "-DCMAKE_BUILD_TYPE=Release"
-    "-DBUILD_SHARED_LIBS_DEFAULT=ON"
-    "-DBUILD_SHARED_LIBS=ON"
+    "-DBUILD_SHARED_LIBS_DEFAULT=OFF"
+    "-DBUILD_SHARED_LIBS=OFF"
     "-DWITH_C_ARES=ON"
     "-DWITH_SSL=ON"
     "-DUSE_POPT=ON"
