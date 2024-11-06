@@ -33,14 +33,12 @@ HeaderFieldValue::HeaderFieldValue(const HeaderFieldValue& hfv)
      mFieldLength(hfv.mFieldLength),
      mMine(true)
 {
-   if(mFieldLength)
-   {
-      char* newField = new char[mFieldLength];
-      if(hfv.mField != nullptr) {
-         memcpy(newField, hfv.mField, mFieldLength);
-         mField=newField;
+   if (mFieldLength && hfv.mField) // Check both length and source field
+      {
+         char* newField = new char[mFieldLength+2];  // Add padding
+         memcpy(newField, hfv.mField, mFieldLength); // Copy the data
+         mField = newField; // Assign after copy succeeds
       }
-   }
 }
 
 HeaderFieldValue&
