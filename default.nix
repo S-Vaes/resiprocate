@@ -25,7 +25,7 @@
 
 stdenv.mkDerivation rec {
   pname = "resiprocate";
-  version = "fix/asan-profile-fix"; # Update this with your fix date
+  version = "nix-test";
 
   src = ./.;
 
@@ -40,8 +40,8 @@ stdenv.mkDerivation rec {
 
   # Update the git ID to match your fork's commit
   NIX_CFLAGS_COMPILE = [
-    "-DRESIPROCATE_GIT_ID=\"${version}\""
-    "-DRESIPROCATE_BRANCH_NAME=\"fix/asan-profile-fix\""
+    "-DRESIPROCATE_GIT_ID=\"master\""
+    "-DRESIPROCATE_BRANCH_NAME=\"master\""
   ];
 
   cmakeFlags = [
