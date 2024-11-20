@@ -1,0 +1,12 @@
+diff -ur a/sipXportLib/include/utl/UtlRegex.h b/sipXportLib/include/utl/UtlRegex.h
+--- a/sipXportLib/include/utl/UtlRegex.h
++++ b/sipXportLib/include/utl/UtlRegex.h
+@@ -16,7 +16,7 @@
+ 
+ // Forward declarations
+ struct real_pcre;
+-typedef struct real_pcre pcre;
++typedef struct real_pcre8_or_16 pcre;
+ struct pcre_extra;
+ 
+ /**
