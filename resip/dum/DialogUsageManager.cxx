@@ -863,6 +863,20 @@ DialogUsageManager::makePublication(const NameAddr& targetDocument,
 
 std::shared_ptr<SipMessage>
 DialogUsageManager::makePublication(const NameAddr& targetDocument,
+                                    const DialogSetId& dialogSetId,
+                                    const std::shared_ptr<UserProfile>& userProfile,
+                                    const Contents& body,
+                                    const Data& eventType,
+                                    AppDialogSet* appDs) {
+   resip_assert(mDialogSetMap.find(dialogSetId) == mDialogSetMap.end());
+   BaseCreator* creator(new PublicationCreator(*this, targetDocument, userProfile, body, eventType, userProfile->getDefaultPublicationTime()));
+   creator->getLastRequest()->header(h_CallID).value() = dialogSetId.getCallId();
+   creator->getLastRequest()->header(h_From).param(p_tag) = dialogSetId.getLocalTag();
+   return makeNewSession(creator, appDs);
+}
+
+std::shared_ptr<SipMessage>
+DialogUsageManager::makePublication(const NameAddr& targetDocument,
                                     const Contents& body,
                                     const Data& eventType,
                                     uint32_t expiresSeconds,

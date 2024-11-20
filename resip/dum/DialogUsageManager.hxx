@@ -233,11 +233,17 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       std::shared_ptr<SipMessage> makeRefer(const NameAddr& target, const H_ReferTo::Type& referTo, AppDialogSet* = nullptr);
 
       std::shared_ptr<SipMessage> makePublication(const NameAddr& target,
-                                            const std::shared_ptr<UserProfile>& userProfile,
-                                            const Contents& body,
-                                            const Data& eventType,
-                                            uint32_t expiresSeconds,
-                                            AppDialogSet* = nullptr);
+                                                  const std::shared_ptr<UserProfile>& userProfile,
+                                                  const Contents& body,
+                                                  const Data& eventType,
+                                                  uint32_t expiresSeconds,
+                                                  AppDialogSet* = nullptr);
+      std::shared_ptr<SipMessage> makePublication(const NameAddr& target,
+                                                  const DialogSetId& dialogSetId,
+                                                  const std::shared_ptr<UserProfile>& userProfile,
+                                                  const Contents& body,
+                                                  const Data& eventType,
+                                                  AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makePublication(const NameAddr& target,
                                             const Contents& body,
                                             const Data& eventType,
