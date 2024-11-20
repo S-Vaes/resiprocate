@@ -96,7 +96,7 @@ using namespace std;
 
 
 DialogUsageManager::DialogUsageManager(SipStack& stack, bool createDefaultFeatures) :
-   TransactionUser(TransactionUser::DoNotRegisterForTransactionTermination, 
+   TransactionUser(TransactionUser::DoNotRegisterForTransactionTermination,
                    TransactionUser::RegisterForConnectionTermination,
                    TransactionUser::RegisterForKeepAlivePongs),
    mRedirectManager(new RedirectManager()),
@@ -200,7 +200,7 @@ DialogUsageManager::~DialogUsageManager()
    //InfoLog ( << "~DialogUsageManager done" );
 }
 
-const Data& 
+const Data&
 DialogUsageManager::name() const
 {
    static Data n("DialogUsageManager");
@@ -222,13 +222,13 @@ DialogUsageManager::addTransport( TransportType protocol,
                        transportFlags);
 }
 
-SipStack& 
+SipStack&
 DialogUsageManager::getSipStack()
 {
    return mStack;
 }
 
-const SipStack& 
+const SipStack&
 DialogUsageManager::getSipStack() const
 {
    return mStack;
@@ -270,7 +270,7 @@ void
 DialogUsageManager::shutdown(DumShutdownHandler* h)
 {
    InfoLog (<< "shutdown: dialogSets=" << mDialogSetMap.size());
-   
+
    mDumShutdownHandler = h;
    mShutdownState = ShutdownRequested;
    mStack.requestTransactionUserShutdown(*this);
@@ -281,7 +281,7 @@ DialogUsageManager::shutdown(DumShutdownHandler* h)
 // DialogUsageManager::shutdownIfNoUsages(DumShutdownHandler* h)
 // {
 //    InfoLog (<< "shutdown when no usages");
-// 
+//
 //    mDumShutdownHandler = h;
 //    mShutdownState = ShutdownRequested;
 //    resip_assert(0);
@@ -292,7 +292,7 @@ DialogUsageManager::forceShutdown(DumShutdownHandler* h)
 {
    WarningLog (<< "force shutdown ");
    dumpHandles();
-   
+
    mDumShutdownHandler = h;
    //HandleManager::shutdown();  // clear out usages
    mShutdownState = ShutdownRequested;
@@ -492,7 +492,7 @@ DialogUsageManager::addExternalMessageHandler(ExternalMessageHandler* handler)
    }
 }
 
-void 
+void
 DialogUsageManager::removeExternalMessageHandler(ExternalMessageHandler* handler)
 {
    std::vector<ExternalMessageHandler*>::iterator found = std::find(mExternalMessageHandlers.begin(), mExternalMessageHandlers.end(), handler);
@@ -502,7 +502,7 @@ DialogUsageManager::removeExternalMessageHandler(ExternalMessageHandler* handler
    }
 }
 
-void 
+void
 DialogUsageManager::clearExternalMessageHandler()
 {
    std::vector<ExternalMessageHandler*> empty;
@@ -572,11 +572,11 @@ DialogUsageManager::makeInviteSession(const NameAddr& target, const Contents* in
 }
 
 std::shared_ptr<SipMessage>
-DialogUsageManager::makeInviteSession(const NameAddr& target, 
+DialogUsageManager::makeInviteSession(const NameAddr& target,
                                       const std::shared_ptr<UserProfile>& userProfile,
-                                      const Contents* initialOffer, 
-                                      EncryptionLevel level, 
-                                      const Contents* alternative, 
+                                      const Contents* initialOffer,
+                                      EncryptionLevel level,
+                                      const Contents* alternative,
                                       AppDialogSet* appDs)
 {
    auto inv = makeNewSession(new InviteSessionCreator(*this, target, userProfile, initialOffer, level, alternative), appDs);
@@ -585,9 +585,9 @@ DialogUsageManager::makeInviteSession(const NameAddr& target,
 }
 
 std::shared_ptr<SipMessage>
-DialogUsageManager::makeInviteSession(const NameAddr& target, 
-                                      const Contents* initialOffer, 
-                                      EncryptionLevel level, 
+DialogUsageManager::makeInviteSession(const NameAddr& target,
+                                      const Contents* initialOffer,
+                                      EncryptionLevel level,
                                       const Contents* alternative,
                                       AppDialogSet* appDs)
 {
@@ -613,10 +613,10 @@ DialogUsageManager::makeInviteSession(const NameAddr& target,
 }
 
 std::shared_ptr<SipMessage>
-DialogUsageManager::makeInviteSession(const NameAddr& target, 
-                                      InviteSessionHandle sessionToReplace, 
+DialogUsageManager::makeInviteSession(const NameAddr& target,
+                                      InviteSessionHandle sessionToReplace,
                                       const std::shared_ptr<UserProfile>& userProfile,
-                                      const Contents* initialOffer, 
+                                      const Contents* initialOffer,
                                       AppDialogSet* ads)
 {
    auto inv = makeInviteSession(target, userProfile, initialOffer, ads);
@@ -635,12 +635,12 @@ DialogUsageManager::makeInviteSession(const NameAddr& target,
 }
 
 std::shared_ptr<SipMessage>
-DialogUsageManager::makeInviteSession(const NameAddr& target, 
-                                      InviteSessionHandle sessionToReplace, 
+DialogUsageManager::makeInviteSession(const NameAddr& target,
+                                      InviteSessionHandle sessionToReplace,
                                       const std::shared_ptr<UserProfile>& userProfile,
-                                      const Contents* initialOffer, 
-                                      EncryptionLevel level, 
-                                      const Contents* alternative, 
+                                      const Contents* initialOffer,
+                                      EncryptionLevel level,
+                                      const Contents* alternative,
                                       AppDialogSet* ads)
 {
    auto inv = makeInviteSession(target, userProfile, initialOffer, level, alternative, ads);
@@ -659,11 +659,11 @@ DialogUsageManager::makeInviteSession(const NameAddr& target,
 }
 
 std::shared_ptr<SipMessage>
-DialogUsageManager::makeInviteSession(const NameAddr& target, 
-                                      InviteSessionHandle sessionToReplace, 
-                                      const Contents* initialOffer, 
-                                      EncryptionLevel level, 
-                                      const Contents* alternative , 
+DialogUsageManager::makeInviteSession(const NameAddr& target,
+                                      InviteSessionHandle sessionToReplace,
+                                      const Contents* initialOffer,
+                                      EncryptionLevel level,
+                                      const Contents* alternative ,
                                       AppDialogSet* ads)
 {
    auto inv = makeInviteSession(target, initialOffer, level, alternative, ads);
@@ -824,6 +824,15 @@ DialogUsageManager::makeRegistration(const NameAddr& target, const std::shared_p
 }
 
 std::shared_ptr<SipMessage>
+DialogUsageManager::makeRegistration(const NameAddr& target, const DialogSetId& dialogSetId, const std::shared_ptr<UserProfile>& userProfile, AppDialogSet* appDs) {
+    resip_assert(mDialogSetMap.find(dialogSetId) == mDialogSetMap.end());
+    BaseCreator* creator(new RegistrationCreator(*this, target, userProfile, userProfile->getDefaultRegistrationTime()));
+    creator->getLastRequest()->header(h_CallID).value() = dialogSetId.getCallId();
+    creator->getLastRequest()->header(h_From).param(p_tag) = dialogSetId.getLocalTag();
+    return makeNewSession(creator, appDs);
+}
+
+std::shared_ptr<SipMessage>
 DialogUsageManager::makeRegistration(const NameAddr& target, const std::shared_ptr<UserProfile>& userProfile, uint32_t registrationTime, AppDialogSet* appDs)
 {
    return makeNewSession(new RegistrationCreator(*this, target, userProfile, registrationTime), appDs);
@@ -925,21 +934,21 @@ DialogUsageManager::send(std::shared_ptr<SipMessage> msg)
       msg->remove(h_CallInfos);
       msg->remove(h_Warnings);
    }
-   
+
    resip_assert(userProfile);
-   if (msg->isRequest() 
-       && userProfile->hasProxyRequires() 
-       && msg->header(h_RequestLine).method() != ACK 
+   if (msg->isRequest()
+       && userProfile->hasProxyRequires()
+       && msg->header(h_RequestLine).method() != ACK
        && msg->header(h_RequestLine).method() != CANCEL)
    {
       msg->header(h_ProxyRequires) = userProfile->getProxyRequires();
    }
-   
+
    // .bwc. This is to avoid leaving extra copies of the decorator in msg,
    // when the caller of this function holds onto the reference (and this
    // happens quite often in DUM). I would prefer to refactor such that we
    // are operating on a copy in this function, but this would require a lot
-   // of work on the DumFeatureChain stuff (or, require an extra copy on top 
+   // of work on the DumFeatureChain stuff (or, require an extra copy on top
    // of the one we're doing when we send the message to the stack, which
    // would chew up a lot of extra cycles).
    msg->clearOutboundDecorators();
@@ -1014,7 +1023,7 @@ DialogUsageManager::send(std::shared_ptr<SipMessage> msg)
    outgoingProcess(std::unique_ptr<Message>(event));
 }
 
-void 
+void
 DialogUsageManager::sendCommand(std::shared_ptr<SipMessage> request)
 {
    SendCommand* s=new SendCommand(request, *this);
@@ -1031,7 +1040,7 @@ void DialogUsageManager::outgoingProcess(std::unique_ptr<Message> message)
       {
          tid = sipMsg->getTransactionId();
       }
-      
+
       DumFeatureMessage* featureMsg = dynamic_cast<DumFeatureMessage*>(message.get());
       if (featureMsg)
       {
@@ -1060,9 +1069,9 @@ void DialogUsageManager::outgoingProcess(std::unique_ptr<Message> message)
             it = mOutgoingFeatureChainMap.insert(lb, FeatureChainMap::value_type(tid, new DumFeatureChain(*this, mOutgoingFeatureList, *mOutgoingTarget)));
          }
       }
-      
+
       DumFeatureChain::ProcessingResult res = it->second->process(message.get());
-      
+
       if (res & DumFeatureChain::ChainDoneBit)
       {
          delete it->second;
@@ -1103,7 +1112,7 @@ void DialogUsageManager::outgoingProcess(std::unique_ptr<Message> message)
          std::unique_ptr<SipMessage> toSend(static_cast<SipMessage*>(event->message()->clone()));
 
          // .bwc. Protect ourselves from garbage with an isWellFormed() check.
-         // (Code in Dialog doesn't check for well-formedness in the 
+         // (Code in Dialog doesn't check for well-formedness in the
          // Record-Route stack, so bad stuff there can end up here)
          if (event->message()->exists(h_Routes) &&
              !event->message()->header(h_Routes).empty() &&
@@ -1130,11 +1139,11 @@ DialogUsageManager::sendUsingOutboundIfAppropriate(UserProfile& userProfile, std
 {
    //a little inefficient, branch parameter might be better
    DialogId id(*msg);
-   if (userProfile.hasOutboundProxy() && 
+   if (userProfile.hasOutboundProxy() &&
       (!findDialog(id) || userProfile.getForceOutboundProxyOnAllRequestsEnabled()))
    {
-      DebugLog ( << "Using outbound proxy: " 
-                 << userProfile.getOutboundProxy().uri() 
+      DebugLog ( << "Using outbound proxy: "
+                 << userProfile.getOutboundProxy().uri()
                  << " -> " << msg->brief());
 
       if (userProfile.getExpressOutboundAsRouteSetEnabled())
@@ -1294,7 +1303,7 @@ DialogUsageManager::findInviteSession(CallId replaces)
             ErrorStatusCode = 486; // Busy Here
             is = InviteSessionHandle::NotValid();
          }
-      }      
+      }
       else if(!is->isEarly())
       {
          // replaces can't be used on early dialogs that were not initiated by this UA - ie. InviteSession::Proceeding state
@@ -1337,14 +1346,14 @@ DialogUsageManager::internalProcess(std::unique_ptr<Message> msg)
 #ifdef RESIP_DUM_THREAD_DEBUG
    if(!mThreadDebugKey)
    {
-      // .bwc. Probably means multiple threads are trying to give DUM cycles 
+      // .bwc. Probably means multiple threads are trying to give DUM cycles
       // simultaneously.
       resip_assert(!mHiddenThreadDebugKey);
       // No d'tor needed, since we're just going to use a pointer to this.
       if(!ThreadIf::tlsKeyCreate(mThreadDebugKey, 0))
       {
-         // .bwc. We really could pass anything here, but for the sake of 
-         // passing a valid pointer, I have (completely arbitrarily) chosen a 
+         // .bwc. We really could pass anything here, but for the sake of
+         // passing a valid pointer, I have (completely arbitrarily) chosen a
          // pointer to the DUM. All that matters is that this value is non-null
          ThreadIf::tlsSetValue(mThreadDebugKey, this);
       }
@@ -1379,7 +1388,7 @@ DialogUsageManager::internalProcess(std::unique_ptr<Message> msg)
          return;
       }
    }
-   
+
    {
       KeepAlivePong* pong = dynamic_cast<KeepAlivePong*>(msg.get());
       if (pong)
@@ -1426,7 +1435,7 @@ DialogUsageManager::internalProcess(std::unique_ptr<Message> msg)
          {
             mKeepAliveManager->process(*keepAliveMsg);
          }
-         return;      
+         return;
       }
    }
 
@@ -1439,7 +1448,7 @@ DialogUsageManager::internalProcess(std::unique_ptr<Message> msg)
          {
             mKeepAliveManager->process(*keepAlivePongMsg);
          }
-         return;      
+         return;
       }
    }
 
@@ -1448,13 +1457,13 @@ DialogUsageManager::internalProcess(std::unique_ptr<Message> msg)
       if (terminated)
       {
          // Notify all dialogSets, in case they need to react (ie. client outbound support)
-         // First find all applicable dialogsets, since flow token in user profile will 
+         // First find all applicable dialogsets, since flow token in user profile will
          // be cleared by first dialogset we notify, then notify all dialogset's
          std::list<DialogSet*> dialogSetsToNotify;
          DialogSetMap::iterator it =  mDialogSetMap.begin();
          for(; it != mDialogSetMap.end(); it++)
          {
-            if(it->second->mUserProfile->clientOutboundEnabled() && 
+            if(it->second->mUserProfile->clientOutboundEnabled() &&
                it->second->mUserProfile->getClientOutboundFlowTuple().mFlowKey == terminated->getFlow().mFlowKey &&  // Flow key is not part of Tuple operator=, check it first
                it->second->mUserProfile->getClientOutboundFlowTuple() == terminated->getFlow())
             {
@@ -1491,7 +1500,7 @@ DialogUsageManager::internalProcess(std::unique_ptr<Message> msg)
       {
          //DebugLog(<< "DumCommand" );
          command->executeCommand();
-         return;      
+         return;
       }
    }
 
@@ -1511,7 +1520,7 @@ void
 DialogUsageManager::processExternalMessage(ExternalMessageBase* externalMessage)
 {
    bool handled = false;
-   for(std::vector<ExternalMessageHandler*>::iterator i = mExternalMessageHandlers.begin(); 
+   for(std::vector<ExternalMessageHandler*>::iterator i = mExternalMessageHandlers.begin();
       i != mExternalMessageHandlers.end(); ++i)
    {
       (*i)->onMessage(externalMessage, handled);
@@ -1522,7 +1531,7 @@ DialogUsageManager::processExternalMessage(ExternalMessageBase* externalMessage)
    }
 }
 
-void 
+void
 DialogUsageManager::incomingProcess(std::unique_ptr<Message> msg)
 {
    //call or create feature chain if appropriate
@@ -1552,12 +1561,12 @@ DialogUsageManager::incomingProcess(std::unique_ptr<Message> msg)
             garbage=true;
             reason.append("Malformed Call-Id, ",19);
          }
-         
+
          if(garbage)
          {
             if(sipMsg->isRequest() && sipMsg->method()!=ACK)
             {
-               // .bwc. Either we need to trim the last comma off, or make this 
+               // .bwc. Either we need to trim the last comma off, or make this
                // a proper sentence fragment. This is more fun.
                reason.append("fix your code!",14);
                SipMessage failure;
@@ -1566,13 +1575,13 @@ DialogUsageManager::incomingProcess(std::unique_ptr<Message> msg)
             }
 
             InfoLog (<< "Malformed header in message (" << reason << ") - rejecting/discarding: " << *sipMsg);
-            
-            // .bwc. Only forge a response when appropriate, but return in any 
+
+            // .bwc. Only forge a response when appropriate, but return in any
             // case.
             return;
          }
       }
-      
+
       DumFeatureMessage* featureMsg = dynamic_cast<DumFeatureMessage*>(msg.get());
       if (featureMsg)
       {
@@ -1582,7 +1591,7 @@ DialogUsageManager::incomingProcess(std::unique_ptr<Message> msg)
    }
    if (tid != Data::Empty && !mIncomingFeatureList.empty())
    {
-      FeatureChainMap::iterator it;     
+      FeatureChainMap::iterator it;
       //efficiently find or create FeatureChain, should prob. be a utility template
       {
          FeatureChainMap::iterator lb = mIncomingFeatureChainMap.lower_bound(tid);
@@ -1598,22 +1607,22 @@ DialogUsageManager::incomingProcess(std::unique_ptr<Message> msg)
             }
             else
             {
-               // Certain messages from the wire (ie: CANCEL) can end a feature, however there may still be some 
+               // Certain messages from the wire (ie: CANCEL) can end a feature, however there may still be some
                // pending Async requests (non-SipMessages) that are coming in - just drop them if so
                return;
             }
          }
       }
-      
+
       DumFeatureChain::ProcessingResult res = it->second->process(msg.get());
-      
+
       if (res & DumFeatureChain::ChainDoneBit)
       {
          delete it->second;
          mIncomingFeatureChainMap.erase(it);
          //DebugLog(<< "feature chain deleted" << endl);
       }
- 
+
       if (res & DumFeatureChain::EventTakenBit)
       {
          msg.release();
@@ -1621,7 +1630,7 @@ DialogUsageManager::incomingProcess(std::unique_ptr<Message> msg)
          return;
       }
    }
-   
+
    try
    {
       DebugLog (<< "Got: " << msg->brief());
@@ -1696,14 +1705,14 @@ DialogUsageManager::incomingProcess(std::unique_ptr<Message> msg)
    }
 }
 
-bool 
+bool
 DialogUsageManager::hasEvents() const
 {
    return mFifo.messageAvailable();
 }
 
 // return true if there is more to do
-bool 
+bool
 DialogUsageManager::process(resip::Mutex* mutex)
 {
    if (mFifo.messageAvailable())
@@ -1714,11 +1723,11 @@ DialogUsageManager::process(resip::Mutex* mutex)
 #endif
       internalProcess(std::unique_ptr<Message>(mFifo.getNext()));
 #ifdef RESIP_DUM_THREAD_DEBUG
-      // .bwc. Thread checking is disabled if mThreadDebugKey is 0; if the app 
+      // .bwc. Thread checking is disabled if mThreadDebugKey is 0; if the app
       // is using this mutex-locked process() call, we only enable thread-
-      // checking while the mutex is locked. Accesses from another thread while 
-      // the mutex is not locked are probably intentional. However, if the app 
-      // accesses the DUM inappropriately anyway, we'll probably detect it if 
+      // checking while the mutex is locked. Accesses from another thread while
+      // the mutex is not locked are probably intentional. However, if the app
+      // accesses the DUM inappropriately anyway, we'll probably detect it if
       // it happens during the internalProcess() call.
       mHiddenThreadDebugKey=mThreadDebugKey;
       mThreadDebugKey=0;
@@ -1727,7 +1736,7 @@ DialogUsageManager::process(resip::Mutex* mutex)
    return mFifo.messageAvailable();
 }
 
-bool 
+bool
 DialogUsageManager::process(int timeoutMs, resip::Mutex* mutex)
 {
    std::unique_ptr<Message> message;
@@ -1748,11 +1757,11 @@ DialogUsageManager::process(int timeoutMs, resip::Mutex* mutex)
 #endif
       internalProcess(std::move(message));
 #ifdef RESIP_DUM_THREAD_DEBUG
-      // .bwc. Thread checking is disabled if mThreadDebugKey is 0; if the app 
+      // .bwc. Thread checking is disabled if mThreadDebugKey is 0; if the app
       // is using this mutex-locked process() call, we only enable thread-
-      // checking while the mutex is locked. Accesses from another thread while 
-      // the mutex is not locked are probably intentional. However, if the app 
-      // accesses the DUM inappropriately anyway, we'll probably detect it if 
+      // checking while the mutex is locked. Accesses from another thread while
+      // the mutex is not locked are probably intentional. However, if the app
+      // accesses the DUM inappropriately anyway, we'll probably detect it if
       // it happens during the internalProcess() call.
       mHiddenThreadDebugKey=mThreadDebugKey;
       mThreadDebugKey=0;
@@ -1773,11 +1782,11 @@ DialogUsageManager::process(resip::RecursiveMutex& mutex)
 #endif
       internalProcess(std::unique_ptr<Message>(mFifo.getNext()));
 #ifdef RESIP_DUM_THREAD_DEBUG
-      // .bwc. Thread checking is disabled if mThreadDebugKey is 0; if the app 
+      // .bwc. Thread checking is disabled if mThreadDebugKey is 0; if the app
       // is using this mutex-locked process() call, we only enable thread-
-      // checking while the mutex is locked. Accesses from another thread while 
-      // the mutex is not locked are probably intentional. However, if the app 
-      // accesses the DUM inappropriately anyway, we'll probably detect it if 
+      // checking while the mutex is locked. Accesses from another thread while
+      // the mutex is not locked are probably intentional. However, if the app
+      // accesses the DUM inappropriately anyway, we'll probably detect it if
       // it happens during the internalProcess() call.
       mHiddenThreadDebugKey = mThreadDebugKey;
       mThreadDebugKey = 0;
@@ -1807,11 +1816,11 @@ DialogUsageManager::process(int timeoutMs, resip::RecursiveMutex& mutex)
 #endif
       internalProcess(std::move(message));
 #ifdef RESIP_DUM_THREAD_DEBUG
-      // .bwc. Thread checking is disabled if mThreadDebugKey is 0; if the app 
+      // .bwc. Thread checking is disabled if mThreadDebugKey is 0; if the app
       // is using this mutex-locked process() call, we only enable thread-
-      // checking while the mutex is locked. Accesses from another thread while 
-      // the mutex is not locked are probably intentional. However, if the app 
-      // accesses the DUM inappropriately anyway, we'll probably detect it if 
+      // checking while the mutex is locked. Accesses from another thread while
+      // the mutex is not locked are probably intentional. However, if the app
+      // accesses the DUM inappropriately anyway, we'll probably detect it if
       // it happens during the internalProcess() call.
       mHiddenThreadDebugKey = mThreadDebugKey;
       mThreadDebugKey = 0;
@@ -1846,7 +1855,7 @@ DialogUsageManager::validateRequestURI(const SipMessage& request)
       SipMessage failure;
       makeResponse(failure, request, 416);
       sendResponse(failure);
-      
+
       if(mRequestValidationHandler)
          mRequestValidationHandler->onInvalidScheme(request);
 
@@ -1874,7 +1883,7 @@ DialogUsageManager::validateRequiredOptions(const SipMessage& request)
          makeResponse(failure, request, 420);
          failure.header(h_Unsupporteds) = unsupported;
          sendResponse(failure);
-      
+
          if(mRequestValidationHandler)
             mRequestValidationHandler->onInvalidRequiredOptions(request);
 
@@ -1900,7 +1909,7 @@ DialogUsageManager::validate100RelSupport(const SipMessage& request)
             makeResponse(failure, request, 421);
             failure.header(h_Requires).push_back(Token(Symbols::C100rel));
             sendResponse(failure);
-      
+
             if(mRequestValidationHandler)
             {
                mRequestValidationHandler->on100RelNotSupportedByRemote(request);
@@ -1931,7 +1940,7 @@ DialogUsageManager::validateContent(const SipMessage& request)
          makeResponse(failure, request, 415);
          failure.header(h_Accepts) = getMasterProfile()->getSupportedMimeTypes(request.header(h_RequestLine).method());
          sendResponse(failure);
-            
+
          if(mRequestValidationHandler)
             mRequestValidationHandler->onInvalidContentType(request);
 
@@ -1945,7 +1954,7 @@ DialogUsageManager::validateContent(const SipMessage& request)
          makeResponse(failure, request, 415);
          failure.header(h_AcceptEncodings) = getMasterProfile()->getSupportedEncodings();
          sendResponse(failure);
-         
+
          if(mRequestValidationHandler)
             mRequestValidationHandler->onInvalidContentEncoding(request);
 
@@ -1961,7 +1970,7 @@ DialogUsageManager::validateContent(const SipMessage& request)
          makeResponse(failure, request, 415);
          failure.header(h_AcceptLanguages) = getMasterProfile()->getSupportedLanguages();
          sendResponse(failure);
-         
+
          if(mRequestValidationHandler)
             mRequestValidationHandler->onInvalidContentLanguage(request);
 
@@ -2149,7 +2158,7 @@ DialogUsageManager::processRequest(const SipMessage& request)
          case SUBSCRIBE:
             if (!checkEventPackage(request))
             {
-               InfoLog (<< "Rejecting request (unsupported package) " 
+               InfoLog (<< "Rejecting request (unsupported package) "
                         << request.brief());
                return;
             }
@@ -2165,10 +2174,10 @@ DialogUsageManager::processRequest(const SipMessage& request)
             {
                DialogSetId id(request);
                //cryptographically dangerous
-               if(mDialogSetMap.find(id) != mDialogSetMap.end()) 
+               if(mDialogSetMap.find(id) != mDialogSetMap.end())
                {
-                  // this can only happen if someone sends us a request with the same callid and from tag as one 
-                  // that is in the process of destroying - since this is bad endpoint behaviour - we will 
+                  // this can only happen if someone sends us a request with the same callid and from tag as one
+                  // that is in the process of destroying - since this is bad endpoint behaviour - we will
                   // reject the request with a 400 response
                   SipMessage badrequest;
                   makeResponse(badrequest, request, 400);
@@ -2262,7 +2271,7 @@ DialogUsageManager::processPublish(const SipMessage& request)
       else
       {
          // Check if publication exists in PublicationDb - may have been sync'd over,
-         // or exists from a restart.  In this case, fabricate a new ServerSubcription 
+         // or exists from a restart.  In this case, fabricate a new ServerSubcription
          // to handle this request.
          if (mPublicationPersistenceManager &&
              mPublicationPersistenceManager->documentExists(request.header(h_Event).value(), request.header(h_RequestLine).uri().getAor(), request.header(h_SIPIfMatch).value()))
@@ -2323,7 +2332,7 @@ DialogUsageManager::checkEventPackage(const SipMessage& request)
          case SUBSCRIBE:
             if (!getServerSubscriptionHandler(request.header(h_Event).value()))
             {
-               InfoLog (<< "No handler for event package for SUBSCRIBE: " 
+               InfoLog (<< "No handler for event package for SUBSCRIBE: "
                         << request.header(h_Event).value());
                failureCode = 489;
             }
@@ -2331,7 +2340,7 @@ DialogUsageManager::checkEventPackage(const SipMessage& request)
          case NOTIFY:
             if (!getClientSubscriptionHandler(request.header(h_Event).value()))
             {
-               InfoLog (<< "No handler for event package for NOTIFY: " 
+               InfoLog (<< "No handler for event package for NOTIFY: "
                         << request.header(h_Event).value());
                failureCode = 489;
             }
@@ -2339,7 +2348,7 @@ DialogUsageManager::checkEventPackage(const SipMessage& request)
          case PUBLISH:
             if (!getServerPublicationHandler(request.header(h_Event).value()))
             {
-               InfoLog (<< "No handler for event package for PUBLISH: " 
+               InfoLog (<< "No handler for event package for PUBLISH: "
                         << request.header(h_Event).value());
                failureCode = 489;
             }
@@ -2488,7 +2497,7 @@ DialogUsageManager::getOutOfDialogHandler(const MethodTypes type)
    }
 }
 
-void 
+void
 DialogUsageManager::addIncomingFeature(std::shared_ptr<DumFeature> feat)
 {
    mIncomingFeatureList.emplace_back(feat);
@@ -2541,7 +2550,7 @@ DialogUsageManager::applyToAllClientSubscriptions(ClientSubscriptionFunctor* fun
    }
 }
 
-void 
+void
 DialogUsageManager::endAllServerSubscriptions(TerminateReason reason)
 {
    // Make a copy of the map - since calling end can cause an immediate delete this on the subscription and thus cause
@@ -2554,7 +2563,7 @@ DialogUsageManager::endAllServerSubscriptions(TerminateReason reason)
    }
 }
 
-void 
+void
 DialogUsageManager::endAllServerPublications()
 {
    // Make a copy of the map - since calling end can cause an immediate delete this on the publication and thus cause
@@ -2598,19 +2607,19 @@ DialogUsageManager::removeMergedRequest(const MergedRequestKey& key)
    mMergedRequests.erase(key);
 }
 
-TargetCommand::Target& 
-DialogUsageManager::dumIncomingTarget() 
+TargetCommand::Target&
+DialogUsageManager::dumIncomingTarget()
 {
    return *mIncomingTarget;
 }
 
-TargetCommand::Target& 
-DialogUsageManager::dumOutgoingTarget() 
+TargetCommand::Target&
+DialogUsageManager::dumOutgoingTarget()
 {
    return *mOutgoingTarget;
 }
 
-DialogEventStateManager* 
+DialogEventStateManager*
 DialogUsageManager::createDialogEventStateManager(DialogEventHandler* handler)
 {
    if(handler)
@@ -2626,26 +2635,26 @@ DialogUsageManager::createDialogEventStateManager(DialogEventHandler* handler)
    return mDialogEventStateManager;
 }
 
-void 
+void
 DialogUsageManager::setAdvertisedCapabilities(SipMessage& msg, const std::shared_ptr<UserProfile>& userProfile)
 {
-   if(userProfile->isAdvertisedCapability(Headers::Allow)) 
+   if(userProfile->isAdvertisedCapability(Headers::Allow))
    {
       msg.header(h_Allows) = getMasterProfile()->getAllowedMethods();
    }
-   if(userProfile->isAdvertisedCapability(Headers::AcceptEncoding)) 
+   if(userProfile->isAdvertisedCapability(Headers::AcceptEncoding))
    {
       msg.header(h_AcceptEncodings) = getMasterProfile()->getSupportedEncodings();
    }
-   if(userProfile->isAdvertisedCapability(Headers::AcceptLanguage)) 
+   if(userProfile->isAdvertisedCapability(Headers::AcceptLanguage))
    {
       msg.header(h_AcceptLanguages) = getMasterProfile()->getSupportedLanguages();
    }
-   if(userProfile->isAdvertisedCapability(Headers::AllowEvents)) 
+   if(userProfile->isAdvertisedCapability(Headers::AllowEvents))
    {
       msg.header(h_AllowEvents) = getMasterProfile()->getAllowedEvents();
    }
-   if(userProfile->isAdvertisedCapability(Headers::Supported)) 
+   if(userProfile->isAdvertisedCapability(Headers::Supported))
    {
       msg.header(h_Supporteds) = getMasterProfile()->getSupportedOptionTags();
    }

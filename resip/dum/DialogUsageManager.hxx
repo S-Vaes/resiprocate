@@ -30,7 +30,7 @@
 
 #include <memory>
 
-namespace resip 
+namespace resip
 {
 
 class Security;
@@ -86,7 +86,7 @@ class DialogUsageManager : public HandleManager, public TransactionUser
                       const int line)
                : BaseException(msg, file, line)
             {}
-            
+
             const char* name() const noexcept override { return "DialogUsageManager::Exception"; }
       };
 
@@ -97,16 +97,16 @@ class DialogUsageManager : public HandleManager, public TransactionUser
          Encrypt,
          SignAndEncrypt
       } EncryptionLevel;
-  
+
       // If createDefaultFeatures is true dum will construct a
       // IdentityHandler->EncryptionManager chain.
       DialogUsageManager(SipStack& stack, bool createDefaultFeatures=false);
       virtual ~DialogUsageManager();
-      
+
       // !bwc! Maybe add a giveUpSeconds param to these.
       void shutdown(DumShutdownHandler*);
 
-      // !bwc! This is not properly implemented (has an assert(0) in it). 
+      // !bwc! This is not properly implemented (has an assert(0) in it).
       // I am removing this declaration.
       // void shutdownIfNoUsages(DumShutdownHandler*);
 
@@ -114,12 +114,12 @@ class DialogUsageManager : public HandleManager, public TransactionUser
 
       // Use SipStack::addTransport instead
       RESIP_DEPRECATED(void addTransport( TransportType protocol,
-                         int port=0, 
+                         int port=0,
                          IpVersion version=V4,
-                         const Data& ipInterface = Data::Empty, 
+                         const Data& ipInterface = Data::Empty,
                          const Data& sipDomainname = Data::Empty, // only used
                                                                   // for TLS
-                                                                  // based stuff 
+                                                                  // based stuff
                          const Data& privateKeyPassPhrase = Data::Empty,
                          SecurityTypes::SSLType sslType = SecurityTypes::SSLv23,
                          unsigned transportFlags = 0));
@@ -127,7 +127,7 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       SipStack& getSipStack();
       const SipStack& getSipStack() const;
       Security* getSecurity();
-      
+
       Data getHostAddress();
 
       void setAppDialogSetFactory(std::unique_ptr<AppDialogSetFactory>) noexcept;
@@ -135,14 +135,14 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       void setMasterProfile(const std::shared_ptr<MasterProfile>& masterProfile);
       std::shared_ptr<MasterProfile>& getMasterProfile();
       std::shared_ptr<UserProfile>& getMasterUserProfile();
-      
+
       //optional handler to track the progress of DialogSets
       void setDialogSetHandler(DialogSetHandler* handler) noexcept;
 
       void setKeepAliveManager(std::unique_ptr<KeepAliveManager> keepAlive) noexcept;
 
       //There is a default RedirectManager.  Setting one may cause the old one
-      //to be deleted. 
+      //to be deleted.
       void setRedirectManager(std::unique_ptr<RedirectManager> redirect) noexcept;
       //informational, so a RedirectHandler is not required
       void setRedirectHandler(RedirectHandler* handler) noexcept;
@@ -158,7 +158,7 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       /// If there is no such handler, calling makeInviteSession will throw and
       /// receiving an INVITE as a UAS will respond with 405 Method Not Allowed.
       void setInviteSessionHandler(InviteSessionHandler*);
-      
+
       /// If there is no such handler, calling makeRegistration will throw
       void setClientRegistrationHandler(ClientRegistrationHandler*);
 
@@ -170,10 +170,10 @@ class DialogUsageManager : public HandleManager, public TransactionUser
 
       /// If there is no such handler, calling makePublication will throw
       void addClientPublicationHandler(const Data& eventType, ClientPublicationHandler*);
-      
+
       void addServerSubscriptionHandler(const Data& eventType, ServerSubscriptionHandler*);
       void addServerPublicationHandler(const Data& eventType, ServerPublicationHandler*);
-      
+
       void addOutOfDialogHandler(MethodTypes, OutOfDialogHandler*);
 
       void setRequestValidationHandler(RequestValidationHandler*);
@@ -192,7 +192,7 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       RegistrationPersistenceManager* getRegistrationPersistenceManager() { return mRegistrationPersistenceManager; }
       void setPublicationPersistenceManager(PublicationPersistenceManager*);
       PublicationPersistenceManager* getPublicationPersistenceManager() { return mPublicationPersistenceManager; }
-      
+
       // The message is owned by the underlying datastructure and may go away in
       // the future. If the caller wants to keep it, it should make a copy. The
       // memory will exist at least up until the point where the application
@@ -206,7 +206,7 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       std::shared_ptr<SipMessage> makeInviteSession(const NameAddr& target, InviteSessionHandle sessionToReplace, const std::shared_ptr<UserProfile>& userProfile, const Contents* initialOffer, AppDialogSet* ads = nullptr);
       std::shared_ptr<SipMessage> makeInviteSession(const NameAddr& target, InviteSessionHandle sessionToReplace, const std::shared_ptr<UserProfile>& userProfile, const Contents* initialOffer, EncryptionLevel level = None, const Contents* alternative = nullptr, AppDialogSet* ads = nullptr);
       std::shared_ptr<SipMessage> makeInviteSession(const NameAddr& target, InviteSessionHandle sessionToReplace, const Contents* initialOffer, EncryptionLevel level = None, const Contents* alternative = nullptr, AppDialogSet* ads = nullptr);
-      
+
       //will send a Notify(100)...currently can be decorated through the
       //OnReadyToSend callback.  Probably will change it's own callback/handler soon
       std::shared_ptr<SipMessage> makeInviteSessionFromRefer(const SipMessage& refer, ServerSubscriptionHandle,
@@ -217,7 +217,7 @@ class DialogUsageManager : public HandleManager, public TransactionUser
                                                        const Contents* initialOffer, EncryptionLevel level = None, const Contents* alternative = nullptr, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeInviteSessionFromRefer(const SipMessage& refer, const std::shared_ptr<UserProfile>& userProfile, ServerSubscriptionHandle,
                                                        const Contents* initialOffer, EncryptionLevel level = None, const Contents* alternative = nullptr, AppDialogSet* = nullptr);
-      
+
       std::shared_ptr<SipMessage> makeSubscription(const NameAddr& target, const std::shared_ptr<UserProfile>& userProfile, const Data& eventType, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeSubscription(const NameAddr& target, const std::shared_ptr<UserProfile>& userProfile, const Data& eventType,
                                              uint32_t subscriptionTime, AppDialogSet* = nullptr);
@@ -234,17 +234,18 @@ class DialogUsageManager : public HandleManager, public TransactionUser
 
       std::shared_ptr<SipMessage> makePublication(const NameAddr& target,
                                             const std::shared_ptr<UserProfile>& userProfile,
-                                            const Contents& body, 
-                                            const Data& eventType, 
-                                            uint32_t expiresSeconds, 
+                                            const Contents& body,
+                                            const Data& eventType,
+                                            uint32_t expiresSeconds,
                                             AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makePublication(const NameAddr& target,
-                                            const Contents& body, 
-                                            const Data& eventType, 
-                                            uint32_t expiresSeconds, 
+                                            const Contents& body,
+                                            const Data& eventType,
+                                            uint32_t expiresSeconds,
                                             AppDialogSet* = nullptr);
 
       std::shared_ptr<SipMessage> makeRegistration(const NameAddr& target, const std::shared_ptr<UserProfile>& userProfile, AppDialogSet* = nullptr);
+      std::shared_ptr<SipMessage> makeRegistration(const NameAddr& target, const DialogSetId& dialogSetId, const std::shared_ptr<UserProfile>& userProfile, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeRegistration(const NameAddr& target, const std::shared_ptr<UserProfile>& userProfile, uint32_t registrationTime, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeRegistration(const NameAddr& target, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeRegistration(const NameAddr& target, uint32_t registrationTime, AppDialogSet* = nullptr);
@@ -254,7 +255,7 @@ class DialogUsageManager : public HandleManager, public TransactionUser
 
       ClientPagerMessageHandle makePagerMessage(const NameAddr& target, const std::shared_ptr<UserProfile>& userProfile, AppDialogSet* = nullptr);
       ClientPagerMessageHandle makePagerMessage(const NameAddr& target, AppDialogSet* = nullptr);
-      
+
       void end(DialogSetId invSessionId);
       void send(std::shared_ptr<SipMessage> request);
       void sendCommand(std::shared_ptr<SipMessage> request);
@@ -285,7 +286,7 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       };
 
       //void send(SipMessage& request, EncryptionLevel level);
-      
+
       // give dum an opportunity to handle its events. If process() returns true
       // there are more events to process.
       bool hasEvents() const;
@@ -312,23 +313,23 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       ServerSubscriptionHandler* getServerSubscriptionHandler(const Data& eventType);
 
       // will apply the specified functor(which takes a
-      //ServerSubscriptionHandle) to each matching ServerSubscription.  
+      //ServerSubscriptionHandle) to each matching ServerSubscription.
       //Returns the functor after the last application.
       template<typename UnaryFunction>
-      UnaryFunction applyToServerSubscriptions(const Data& aor, 
-                                               const Data& eventType, 
+      UnaryFunction applyToServerSubscriptions(const Data& aor,
+                                               const Data& eventType,
                                                UnaryFunction applyFn)
       {
          Data key = eventType + aor;
-         std::pair<ServerSubscriptions::iterator,ServerSubscriptions::iterator> 
+         std::pair<ServerSubscriptions::iterator,ServerSubscriptions::iterator>
             range = mServerSubscriptions.equal_range(key);
-         
+
          for (ServerSubscriptions::iterator i=range.first; i!=range.second; ++i)
          {
             ServerSubscriptionHandle h = i->second->getHandle();
             applyFn(h);
          }
-         return applyFn;         
+         return applyFn;
       }
 
       //DUM will delete features in its destructor. Feature manipulation should
@@ -369,21 +370,21 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       void setAdvertisedCapabilities(SipMessage& msg, const std::shared_ptr<UserProfile>& userProfile);
 
    protected:
-      virtual void onAllHandlesDestroyed();      
+      virtual void onAllHandlesDestroyed();
       //TransactionUser virtuals
       virtual const Data& name() const;
       friend class DumThread;
 
       DumFeatureChain::FeatureList mIncomingFeatureList;
       DumFeatureChain::FeatureList mOutgoingFeatureList;
-      
+
       std::shared_ptr<DumFeature> mOutgoingMessageInterceptor;
 
       typedef std::map<Data, DumFeatureChain*> FeatureChainMap;
       FeatureChainMap mIncomingFeatureChainMap;
       FeatureChainMap mOutgoingFeatureChainMap;
-  
-   private:     
+
+   private:
       friend class Dialog;
       friend class DialogSet;
 
@@ -410,7 +411,7 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       class IncomingTarget : public TargetCommand::Target
       {
          public:
-            IncomingTarget(DialogUsageManager& dum) : TargetCommand::Target(dum) 
+            IncomingTarget(DialogUsageManager& dum) : TargetCommand::Target(dum)
             {
             }
 
@@ -419,11 +420,11 @@ class DialogUsageManager : public HandleManager, public TransactionUser
                mDum.incomingProcess(std::move(msg));
             }
       };
-      
+
       class OutgoingTarget : public TargetCommand::Target
       {
          public:
-            OutgoingTarget(DialogUsageManager& dum) : TargetCommand::Target(dum) 
+            OutgoingTarget(DialogUsageManager& dum) : TargetCommand::Target(dum)
             {
             }
 
@@ -437,9 +438,9 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       std::shared_ptr<SipMessage> makeNewSession(BaseCreator* creator, AppDialogSet* appDs);
 
       // makes a proto response to a request
-      void makeResponse(SipMessage& response, 
-                        const SipMessage& request, 
-                        int responseCode, 
+      void makeResponse(SipMessage& response,
+                        const SipMessage& request,
+                        int responseCode,
                         const Data& reason = Data::Empty) const;
       // May call a callback to let the app adorn
       void sendResponse(const SipMessage& response);
@@ -448,21 +449,21 @@ class DialogUsageManager : public HandleManager, public TransactionUser
 
       void addTimer(DumTimeout::Type type,
                     unsigned long durationSeconds,
-                    BaseUsageHandle target, 
-                    unsigned int seq, 
+                    BaseUsageHandle target,
+                    unsigned int seq,
                     unsigned int altseq=0);
 
       void addTimerMs(DumTimeout::Type type,
                         unsigned long duration,
-                        BaseUsageHandle target, 
-                        unsigned int seq, 
+                        BaseUsageHandle target,
+                        unsigned int seq,
                         unsigned int altseq=0,
                         const Data &transactionId = Data::Empty);
 
       Dialog& findOrCreateDialog(const SipMessage* msg);
       Dialog* findDialog(const DialogId& id);
       DialogSet* findDialogSet(const DialogSetId& id);
-      
+
       // return 0, if no matching BaseCreator
       BaseCreator* findCreator(const DialogId& id);
 
@@ -474,12 +475,12 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       bool validateAccept(const SipMessage& request);
       bool validateTo(const SipMessage& request);
       bool validate100RelSupport(const SipMessage& request);
-      
+
       bool mergeRequest(const SipMessage& request);
 
       void processPublish(const SipMessage& publish);
 
-      void removeDialogSet(const DialogSetId& );      
+      void removeDialogSet(const DialogSetId& );
 
       bool checkEventPackage(const SipMessage& request);
 
@@ -500,10 +501,10 @@ class DialogUsageManager : public HandleManager, public TransactionUser
 
       typedef std::set<MergedRequestKey> MergedRequests;
       MergedRequests mMergedRequests;
-            
+
       typedef std::map<Data, DialogSet*> CancelMap;
       CancelMap mCancelMap;
-      
+
       typedef HashMap<DialogSetId, DialogSet*> DialogSetMap;
       DialogSetMap mDialogSetMap;
 
@@ -511,13 +512,13 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       std::shared_ptr<UserProfile> mMasterUserProfile;
       std::unique_ptr<RedirectManager>   mRedirectManager;
       std::unique_ptr<ClientAuthManager> mClientAuthManager;
-      //std::unique_ptr<ServerAuthManager> mServerAuthManager;  
-    
+      //std::unique_ptr<ServerAuthManager> mServerAuthManager;
+
       InviteSessionHandler* mInviteSessionHandler;
       ClientRegistrationHandler* mClientRegistrationHandler;
-      ServerRegistrationHandler* mServerRegistrationHandler;      
+      ServerRegistrationHandler* mServerRegistrationHandler;
       RedirectHandler* mRedirectHandler;
-      DialogSetHandler* mDialogSetHandler;      
+      DialogSetHandler* mDialogSetHandler;
       RequestValidationHandler* mRequestValidationHandler;
 
       RegistrationPersistenceManager *mRegistrationPersistenceManager;
@@ -545,7 +546,7 @@ class DialogUsageManager : public HandleManager, public TransactionUser
 
       SipStack& mStack;
       DumShutdownHandler* mDumShutdownHandler;
-      typedef enum 
+      typedef enum
       {
          Running,
          ShutdownRequested, // while ending usages
@@ -559,7 +560,7 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       typedef std::map<Data, ServerPublication*> ServerPublications;
       ServerPublications mServerPublications;
       typedef std::map<Data, SipMessage*> RequiresCerts;
-      RequiresCerts mRequiresCerts;      
+      RequiresCerts mRequiresCerts;
       // from Event-Type+document-aor -> ServerSubscription
       // Managed by ServerSubscription
       typedef std::multimap<Data, ServerSubscription*> ServerSubscriptions;
@@ -578,22 +579,22 @@ class DialogUsageManager : public HandleManager, public TransactionUser
 #endif
 
 /* ====================================================================
- * The Vovida Software License, Version 1.0 
- * 
+ * The Vovida Software License, Version 1.0
+ *
  * Copyright (c) 2000 Vovida Networks, Inc.  All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 
+ *
  * 3. The names "VOCAL", "Vovida Open Communication Application Library",
  *    and "Vovida Open Communication Application Library (VOCAL)" must
  *    not be used to endorse or promote products derived from this
@@ -603,7 +604,7 @@ class DialogUsageManager : public HandleManager, public TransactionUser
  * 4. Products derived from this software may not be called "VOCAL", nor
  *    may "VOCAL" appear in their name, without prior written
  *    permission of Vovida Networks, Inc.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
@@ -617,9 +618,9 @@ class DialogUsageManager : public HandleManager, public TransactionUser
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
  * DAMAGE.
- * 
+ *
  * ====================================================================
- * 
+ *
  * This software consists of voluntary contributions made by Vovida
  * Networks, Inc. and many individuals on behalf of Vovida Networks,
  * Inc.  For more information on Vovida Networks, Inc., please see
