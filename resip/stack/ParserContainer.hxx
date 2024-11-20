@@ -35,14 +35,14 @@ class ParserContainer : public ParserContainerBase
       ParserContainer()
          : ParserContainerBase(Headers::UNKNOWN)
       {}
-      
+
       ParserContainer(PoolBase& pool)
          : ParserContainerBase(Headers::UNKNOWN,pool)
       {}
-      
-      /** 
+
+      /**
          @internal
-         @brief Used by SipMessage (using this carries a high risk of blowing 
+         @brief Used by SipMessage (using this carries a high risk of blowing
             your feet off).
       */
       ParserContainer(HeaderFieldValueList* hfvs,
@@ -53,7 +53,7 @@ class ParserContainer : public ParserContainerBase
          for (HeaderFieldValueList::iterator i = hfvs->begin();
               i != hfvs->end(); i++)
          {
-            // create, store without copying -- 
+            // create, store without copying --
             // keeps the HeaderFieldValue from reallocating its buffer
             mParsers.push_back(HeaderKit::Empty);
             mParsers.back().hfv.init(i->getBuffer(),i->getLength(),false);
@@ -69,7 +69,7 @@ class ParserContainer : public ParserContainerBase
          for (HeaderFieldValueList::iterator i = hfvs->begin();
               i != hfvs->end(); i++)
          {
-            // create, store without copying -- 
+            // create, store without copying --
             // keeps the HeaderFieldValue from reallocating its buffer
             mParsers.push_back(HeaderKit::Empty);
             mParsers.back().hfv.init(i->getBuffer(),i->getLength(),false);
@@ -101,40 +101,40 @@ class ParserContainer : public ParserContainerBase
       /**
          @brief Returns the first header field value in this container.
       */
-      T& front() 
+      T& front()
       {
          return ensureInitialized(mParsers.front(),this);
       }
-      
+
       /**
          @brief Returns the last header field value in this container.
       */
-      T& back() 
-      { 
+      T& back()
+      {
          return ensureInitialized(mParsers.back(),this);
       }
-      
+
       /**
          @brief Returns the first header field value in this container.
       */
-      const T& front() const 
-      { 
+      const T& front() const
+      {
          return ensureInitialized(mParsers.front(),this);
       }
-      
+
       /**
          @brief Returns the last header field value in this container.
       */
-      const T& back() const 
-      { 
+      const T& back() const
+      {
          return ensureInitialized(mParsers.back(),this);
       }
-      
+
       /**
          @brief Inserts a header field value at the front of this container.
       */
-      void push_front(const T & t) 
-      { 
+      void push_front(const T & t)
+      {
          mParsers.insert(mParsers.begin(), HeaderKit::Empty);
          mParsers.front().pc=makeParser(t);
       }
@@ -142,12 +142,12 @@ class ParserContainer : public ParserContainerBase
       /**
          @brief Inserts a header field value at the back of this container.
       */
-      void push_back(const T & t) 
-      { 
+      void push_back(const T & t)
+      {
          mParsers.push_back(HeaderKit::Empty);
          mParsers.back().pc=makeParser(t);
       }
-            
+
       /**
          @brief Returns a copy of this ParserContainer, in reverse order.
          @todo !bwc! optimize this (we are copying each ParserContainer twice)
@@ -162,80 +162,99 @@ class ParserContainer : public ParserContainerBase
       typedef ParserContainerBase::Parsers Parsers;
       // .dlb. these can be partially hoisted as well
       class const_iterator;
-      
-      /**
-         @brief An iterator class, derived from std::iterator (bidirectional)
-      */
-      class iterator : public std::iterator<std::bidirectional_iterator_tag, T>
-      {
-         public:
-            iterator(typename Parsers::iterator i,ParserContainer* ref) : mIt(i),mRef(ref){}
-            iterator() : mRef(0) {}
-            iterator(const iterator& orig) : mIt(orig.mIt), mRef(orig.mRef) {}
-
-            iterator operator++() {iterator it(++mIt,mRef); return it;}
-            iterator operator++(int) {iterator it(mIt++,mRef); return it;}
-            iterator operator--() {iterator it(--mIt,mRef); return it;}
-            iterator operator--(int) {iterator it(mIt--,mRef); return it;}
-            friend bool operator!=(const iterator& lhs, const iterator& rhs) { return lhs.mIt != rhs.mIt; }
-            friend bool operator==(const iterator& lhs, const iterator& rhs) { return lhs.mIt == rhs.mIt; }
-            iterator& operator=(const iterator& rhs) 
-            {
-               if (&rhs != this)
-               {
-                  mIt = rhs.mIt; 
-                  mRef = rhs.mRef;
-               }
-               return *this;
-            }
-            T& operator*() {return ensureInitialized(*mIt,mRef);}
-            T* operator->() {return &ensureInitialized(*mIt,mRef);}
-         private:
-            typename Parsers::iterator mIt;
-            ParserContainer* mRef;
-            friend class const_iterator;
-            friend class ParserContainer;
-      };
 
       /**
-         @brief A const_iterator class, derived from std::iterator 
-            (bidirectional)
+         @brief An iterator class
       */
-      class const_iterator : public std::iterator<std::bidirectional_iterator_tag, T>
+   class iterator
       {
-         public:
-            const_iterator(Parsers::const_iterator i,const ParserContainer* ref) : mIt(i),mRef(ref){}
-            const_iterator(const const_iterator& orig) : mIt(orig.mIt), mRef(orig.mRef) {}
-            const_iterator(const iterator& orig) : mIt(orig.mIt), mRef(orig.mRef) {}
-            const_iterator() : mRef(0) {}
+      public:
+         // Iterator traits
+         using iterator_category = std::bidirectional_iterator_tag;
+         using value_type = T;
+         using difference_type = std::ptrdiff_t;
+         using pointer = T*;
+         using reference = T&;
 
-            const_iterator operator++() {const_iterator it(++mIt,mRef); return it;}
-            const_iterator operator++(int) {const_iterator it(mIt++,mRef); return it;}
-            const_iterator operator--() {const_iterator it(--mIt,mRef); return it;}
-            const_iterator operator--(int) {const_iterator it(mIt--,mRef); return it;}
-            friend bool operator!=(const const_iterator& lhs, const const_iterator& rhs) { return lhs.mIt != rhs.mIt; }
-            friend bool operator==(const const_iterator& lhs, const const_iterator& rhs) { return lhs.mIt == rhs.mIt; }
-            const_iterator& operator=(const const_iterator& rhs) 
-            {
-               if (&rhs != this)
+         iterator(typename Parsers::iterator i, ParserContainer* ref) : mIt(i), mRef(ref) {}
+         iterator() : mRef(0) {}
+         iterator(const iterator& orig) : mIt(orig.mIt), mRef(orig.mRef) {}
+
+         iterator& operator++() { ++mIt; return *this; }
+         iterator operator++(int) { iterator tmp(*this); ++mIt; return tmp; }
+         iterator& operator--() { --mIt; return *this; }
+         iterator operator--(int) { iterator tmp(*this); --mIt; return tmp; }
+
+         friend bool operator!=(const iterator& lhs, const iterator& rhs) { return lhs.mIt != rhs.mIt; }
+         friend bool operator==(const iterator& lhs, const iterator& rhs) { return lhs.mIt == rhs.mIt; }
+
+         iterator& operator=(const iterator& rhs)
+         {
+            if (&rhs != this)
                {
                   mIt = rhs.mIt;
                   mRef = rhs.mRef;
                }
-               return *this;
-            }
-            const_iterator& operator=(const iterator& rhs) 
-            {
-               mIt = rhs.mIt; 
-               mRef = rhs.mRef;
-               return *this;
-            }
-            const T& operator*() {return ensureInitialized(*mIt,mRef);}
-            const T* operator->() {return &ensureInitialized(*mIt,mRef);}
-         private:
-            friend class iterator;
-            typename Parsers::const_iterator mIt;
-            const ParserContainer* mRef;
+            return *this;
+         }
+
+         reference operator*() { return ensureInitialized(*mIt, mRef); }
+         pointer operator->() { return &ensureInitialized(*mIt, mRef); }
+
+      private:
+         typename Parsers::iterator mIt;
+         ParserContainer* mRef;
+         friend class const_iterator;
+         friend class ParserContainer;
+      };
+
+   class const_iterator
+      {
+      public:
+         // Iterator traits
+         using iterator_category = std::bidirectional_iterator_tag;
+         using value_type = T;
+         using difference_type = std::ptrdiff_t;
+         using pointer = const T*;
+         using reference = const T&;
+
+         const_iterator(Parsers::const_iterator i, const ParserContainer* ref) : mIt(i), mRef(ref) {}
+         const_iterator(const const_iterator& orig) : mIt(orig.mIt), mRef(orig.mRef) {}
+         const_iterator(const iterator& orig) : mIt(orig.mIt), mRef(orig.mRef) {}
+         const_iterator() : mRef(0) {}
+
+         const_iterator& operator++() { ++mIt; return *this; }
+         const_iterator operator++(int) { const_iterator tmp(*this); ++mIt; return tmp; }
+         const_iterator& operator--() { --mIt; return *this; }
+         const_iterator operator--(int) { const_iterator tmp(*this); --mIt; return tmp; }
+
+         friend bool operator!=(const const_iterator& lhs, const const_iterator& rhs) { return lhs.mIt != rhs.mIt; }
+         friend bool operator==(const const_iterator& lhs, const const_iterator& rhs) { return lhs.mIt == rhs.mIt; }
+
+         const_iterator& operator=(const const_iterator& rhs)
+         {
+            if (&rhs != this)
+               {
+                  mIt = rhs.mIt;
+                  mRef = rhs.mRef;
+               }
+            return *this;
+         }
+
+         const_iterator& operator=(const iterator& rhs)
+         {
+            mIt = rhs.mIt;
+            mRef = rhs.mRef;
+            return *this;
+         }
+
+         reference operator*() { return ensureInitialized(*mIt, mRef); }
+         pointer operator->() { return &ensureInitialized(*mIt, mRef); }
+
+      private:
+         friend class iterator;
+         typename Parsers::const_iterator mIt;
+         const ParserContainer* mRef;
       };
 
       /**
@@ -290,13 +309,13 @@ class ParserContainer : public ParserContainerBase
       }
 
       /**
-         @brief Returns a const_iterator pointing to the first header field 
+         @brief Returns a const_iterator pointing to the first header field
             value.
       */
       const_iterator begin() const { return const_iterator(mParsers.begin(),this); }
 
       /**
-         @brief Returns a const_iterator pointing to the first header field 
+         @brief Returns a const_iterator pointing to the first header field
             value.
       */
       const_iterator end() const { return const_iterator(mParsers.end(),this); }
@@ -333,7 +352,7 @@ class ParserContainer : public ParserContainerBase
          return *static_cast<T*>(kit.pc);
       }
 
-      static const T& ensureInitialized(const HeaderKit& kit, 
+      static const T& ensureInitialized(const HeaderKit& kit,
                                  const ParserContainer* ref)
       {
          if(!kit.pc)
@@ -360,9 +379,9 @@ insert(EncodeStream& s, const resip::ParserContainer<T>& c)
 {
    s << "[";
    for (typename resip::ParserContainer <T>::const_iterator i = c.begin();
-        i != c.end(); i++) 
+        i != c.end(); i++)
    {
-      if (i != c.begin()) 
+      if (i != c.begin())
       {
          s << ", ";
       }
@@ -372,28 +391,28 @@ insert(EncodeStream& s, const resip::ParserContainer<T>& c)
    s << "]";
    return s;
 }
- 
+
 }
 
 #endif
 
 /* ====================================================================
- * The Vovida Software License, Version 1.0 
- * 
+ * The Vovida Software License, Version 1.0
+ *
  * Copyright (c) 2000-2005
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 
+ *
  * 3. The names "VOCAL", "Vovida Open Communication Application Library",
  *    and "Vovida Open Communication Application Library (VOCAL)" must
  *    not be used to endorse or promote products derived from this
@@ -403,7 +422,7 @@ insert(EncodeStream& s, const resip::ParserContainer<T>& c)
  * 4. Products derived from this software may not be called "VOCAL", nor
  *    may "VOCAL" appear in their name, without prior written
  *    permission of Vovida Networks, Inc.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
@@ -417,9 +436,9 @@ insert(EncodeStream& s, const resip::ParserContainer<T>& c)
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
  * DAMAGE.
- * 
+ *
  * ====================================================================
- * 
+ *
  * This software consists of voluntary contributions made by Vovida
  * Networks, Inc. and many individuals on behalf of Vovida Networks,
  * Inc.  For more information on Vovida Networks, Inc., please see
