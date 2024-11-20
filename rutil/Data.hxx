@@ -48,7 +48,7 @@ struct DataLocalSize
 #pragma pack(push, 4)
 
 /**
-  @brief An alternative to std::string, encapsulates an arbitrary buffer of 
+  @brief An alternative to std::string, encapsulates an arbitrary buffer of
   bytes.
 
   It has a variety of memory management styles that can be
@@ -59,16 +59,16 @@ struct DataLocalSize
     @li 'Borrow' - The Data instance is borrowing the memory from the passed
                    in buffer. It will modify its contents as necessary,
                    but will not deallocate it.
-            
+
     @li 'Share'  - The Data instance will use the buffer in a read-only mode.
                    If any attempt is made to modify the contents of
                    the Data, it will copy the buffer and modify it.
-           
+
     @li 'Take'   - The Data instance takes complete ownership of the
                    buffer. The buffer is deallocated using delete[].
 
    Additionally, Data has a small locally-allocated buffer (member buffer) that
-   it will use to hold small amounts of data. By default, this buffer can 
+   it will use to hold small amounts of data. By default, this buffer can
    contain 16 bytes, meaning that Data will not use the heap unless it
    needs more than 16 bytes of space. The tradeoff here, of course, is that
    instances of Data will be larger than instances of std::string. Generally
@@ -86,7 +86,7 @@ struct DataLocalSize
    @ingroup text_proc
 */
 
-class Data 
+class Data
 {
    public:
       RESIP_HeapCount(Data);
@@ -149,7 +149,7 @@ class Data
         @todo Remove this constructor
       */
       Data(size_type capacity, bool foo);
-#endif      
+#endif
 
       /**
         Creates a data with a copy of the contents of the
@@ -216,10 +216,10 @@ class Data
       explicit Data(uint64_t value);
 
 #ifndef RESIP_FIXED_POINT
-      enum DoubleDigitPrecision 
+      enum DoubleDigitPrecision
       {
-         ZeroDigitPrecision = 0, OneDigitPrecision, 
-         TwoDigitPrecision, ThreeDigitPrecision, 
+         ZeroDigitPrecision = 0, OneDigitPrecision,
+         TwoDigitPrecision, ThreeDigitPrecision,
          FourDigitPrecision, FiveDigitPrecision,
          SixDigitPrecision, SevenDigitPrecision,
          EightDigitPrecision, NineDigitPrecision,
@@ -234,7 +234,7 @@ class Data
         @param precision  Number of digits after the decimal point.
                           Trailing zeros will be removed.
       */
-      explicit Data(double value, 
+      explicit Data(double value,
                     Data::DoubleDigitPrecision precision = FourDigitPrecision);
 #endif
 
@@ -253,7 +253,7 @@ class Data
       /**
         The various memory management behaviors.
       */
-      enum ShareEnum 
+      enum ShareEnum
       {
         /** The Data instance is borrowing the memory from the passed
             in buffer. It will modify its contents as necessary,
@@ -301,7 +301,7 @@ class Data
       Data(ShareEnum, const char* buffer);
 
       /**
-        Lazily creates a Data from the passed-in Data. 
+        Lazily creates a Data from the passed-in Data.
 
         @see ShareEnum
 
@@ -409,10 +409,20 @@ class Data
 
       friend bool operator==(const Data& lhs, const Data& rhs);
       friend bool operator==(const Data& lhs, const char* rhs);
+      friend bool operator==(const Data& lhs, const std::string& rhs) noexcept;
+#if RESIP_CPP_STANDARD >= 201703L
+      friend bool operator==(const Data& lhs, const std::string_view rhs) noexcept;
+#endif
 
       friend bool operator<(const Data& lhs, const Data& rhs);
       friend bool operator<(const Data& lhs, const char* rhs);
       friend bool operator<(const char* lhs, const Data& rhs);
+      friend bool operator<(const Data& lhs, const std::string& rhs) noexcept;
+      friend bool operator<(const std::string& lhs, const Data& rhs) noexcept;
+#if RESIP_CPP_STANDARD >= 201703L
+      friend bool operator<(const Data& lhs, const std::string_view rhs) noexcept;
+      friend bool operator<(const std::string_view lhs, const Data& rhs) noexcept;
+#endif
 
       Data& operator=(const Data& data)
       {
@@ -425,7 +435,7 @@ class Data
       Data& operator=(Data &&data);
 #endif
 
-      operator std::string() const 
+      operator std::string() const
       {
          return std::string(c_str(), size());
       }
@@ -451,7 +461,7 @@ class Data
 
 #if RESIP_CPP_STANDARD >= 201703L
 
-      operator std::string_view() const 
+      operator std::string_view() const
       {
          return std::string_view(c_str(), size());
       }
@@ -605,7 +615,7 @@ class Data
       }
 
       /**
-        Returns a null-terminated string representing 
+        Returns a null-terminated string representing
 
         @note    Depending on the memory management scheme being used,
                  this method often copies the contents of the Data;
@@ -657,35 +667,35 @@ class Data
         Computes the MD5 hash of the current data.
         @param type The encoding of the return (default is HEX)
         @return The MD5 hash, in the encoding specified by type.
-      */      
+      */
       Data md5(EncodingType type=HEX) const;
 
       /**
         Converts this Data to lowercase.
 
         @note This is silly unless the contents are ASCII.
-      */      
+      */
       Data& lowercase();
 
       /**
         Converts this Data to uppercase.
 
         @note This is silly unless the contents are ASCII.
-      */      
+      */
       Data& uppercase();
 
       /**
-        Converts this Data to lowercase, assuming this Data only consists of 
+        Converts this Data to lowercase, assuming this Data only consists of
         scheme characters.
 
         @note Assuming scheme contents allows the use of a bitmask instead of
-         tolower(), which is faster. Why, you ask? A bitmask is sufficient to 
-         perform a lowercase operation on alphabetical data, since 'a' and 'A' 
-         only differ on bit 6; it is set for 'a', but not for 'A'. Digits always 
-         have bit 6 set, so setting it is a no-op. The last three characters in 
-         the scheme character set are '+', '-', and '.'; all of these have bit 6 
-         set as well. Note that there is no corresponding efficient uppercase 
-         function; clearing bit 6 on either a digit or the the three remaining 
+         tolower(), which is faster. Why, you ask? A bitmask is sufficient to
+         perform a lowercase operation on alphabetical data, since 'a' and 'A'
+         only differ on bit 6; it is set for 'a', but not for 'A'. Digits always
+         have bit 6 set, so setting it is a no-op. The last three characters in
+         the scheme character set are '+', '-', and '.'; all of these have bit 6
+         set as well. Note that there is no corresponding efficient uppercase
+         function; clearing bit 6 on either a digit or the the three remaining
          characters (+=.) will change them.
       */
       Data& schemeLowercase();
@@ -794,29 +804,29 @@ class Data
       Data& clear() { return truncate2(0); };
 
       /**
-        Takes the contents of the Data and converts them to an 
+        Takes the contents of the Data and converts them to an
         integer. Will strip leading whitespace. This method stops
         upon encountering the first non-decimal digit (with exceptions
         made for leading negative signs).
-      */ 
+      */
       int convertInt() const;
       unsigned long convertUnsignedLong() const;
 
       /**
-        Takes the contents of the Data and converts them to a 
+        Takes the contents of the Data and converts them to a
         size_t. Will strip leading whitespace. This method stops
         upon encountering the first non-decimal digit.
-      */ 
+      */
       size_t convertSize() const;
 
 #ifndef RESIP_FIXED_POINT
       /**
-        Takes the contents of the Data and converts them to a 
+        Takes the contents of the Data and converts them to a
         double precision floating point value. Will strip leading
         whitespace. This method stops upon encountering the first
         non-decimal digit (with exceptions made for decimal points
         and leading negative signs).
-      */ 
+      */
       double convertDouble() const;
 #endif
 
@@ -824,7 +834,7 @@ class Data
         Takes the contents of the Data and converts them to an
         unsigned 64-bit integer. Will strip leading whitespace.
         This method stops upon encountering the first non-decimal digit.
-      */ 
+      */
       uint64_t convertUInt64() const;
 
       /**
@@ -845,11 +855,11 @@ class Data
 
       /**
         Copies a portion of this Data into a new Data.
- 
+
         @param first Index of the first byte to copy
         @param count Number of bytes to copy
       */
-      Data substr(size_type first, size_type count = Data::npos) const; 
+      Data substr(size_type first, size_type count = Data::npos) const;
 
       /**
         Finds a specified sequence of bytes in this Data.
@@ -862,12 +872,12 @@ class Data
       */
       size_type find(const Data& match, size_type start = 0) const;
 
-      /** 
+      /**
           Replaces up to max occurrences of the bytes match with
           target. Returns the number of matches.
       */
       int replace(const Data& match, const Data& target, int max=INT_MAX);
-      
+
       /**
         Constant that represents a zero-length data.
       */
@@ -923,12 +933,12 @@ class Data
       static size_t rawCaseInsensitiveHash(const unsigned char* c, size_t size);
 
       /**
-        A faster version of rawCaseInsensitiveHash that has the same collision 
+        A faster version of rawCaseInsensitiveHash that has the same collision
         properties if this Data is made up of RFC 3261 token characters.
 
         @param c Pointer to the buffer to hash
         @param size Number of bytes to be hashed
-        @note This is not guaranteed to return the same value as 
+        @note This is not guaranteed to return the same value as
             rawCaseInsensitiveHash.
       */
       static size_t rawCaseInsensitiveTokenHash(const unsigned char* c, size_t size);
@@ -940,9 +950,9 @@ class Data
       size_t caseInsensitivehash() const;
 
       /**
-        A faster version of caseInsensitiveHash that has the same collision 
+        A faster version of caseInsensitiveHash that has the same collision
         properties if this Data is made up of RFC 3261 token characters.
-        @note This is not guaranteed to return the same value as 
+        @note This is not guaranteed to return the same value as
             rawCaseInsensitiveHash.
       */
       size_t caseInsensitiveTokenHash() const;
@@ -978,9 +988,9 @@ class Data
                             it should not.
 
         @deprecated dlb -- pass a 256 array of bits rather than a function.
-      */      
-      template<class Predicate> EncodeStream& 
-          escapeToStream(EncodeStream& str, 
+      */
+      template<class Predicate> EncodeStream&
+          escapeToStream(EncodeStream& str,
                          Predicate shouldEscape) const;
 
       /**
@@ -990,8 +1000,8 @@ class Data
                             should be added.
 
         @param shouldEscape A bitset representing which chars should be escaped.
-      */      
-      std::ostream& escapeToStream(std::ostream& str, 
+      */
+      std::ostream& escapeToStream(std::ostream& str,
                                    const std::bitset<256>& shouldEscape) const;
 
       static Data fromFile(const Data& filename);
@@ -1018,7 +1028,7 @@ class Data
       */
       void resize(size_type newSize, bool copy);
 
-      static bool isHex(unsigned char c);      
+      static bool isHex(unsigned char c);
 
       /** Trade off between in-object and heap allocation
           Larger LocalAlloc makes for larger objects that have Data members but
@@ -1031,8 +1041,8 @@ class Data
       char mPreBuffer[LocalAlloc];
       // Null terminator for mPreBuffer when mSize==LocalAlloc lands here; this
       // is ok, because Borrow==0.
-      // Note: we could use a char here, and expand mPreBuffer by 3 bytes, but 
-      // this imposes a performance penalty since it requires operating on a 
+      // Note: we could use a char here, and expand mPreBuffer by 3 bytes, but
+      // this imposes a performance penalty since it requires operating on a
       // memory location smaller than a word (requires masking and such).
       size_type mShareEnum;
 
@@ -1096,7 +1106,7 @@ inline bool isLessThanNoCase(const Data& left, const Data& right)
    }
 }
 
-template<class Predicate> EncodeStream& 
+template<class Predicate> EncodeStream&
 Data::escapeToStream(EncodeStream& str, Predicate shouldEscape) const
 {
    constexpr char hex[] = "0123456789ABCDEF";
@@ -1105,7 +1115,7 @@ Data::escapeToStream(EncodeStream& str, Predicate shouldEscape) const
    {
       return str;
    }
-   
+
    const unsigned char* p = (unsigned char*)mBuf;
    const unsigned char* e = (unsigned char*)mBuf + mSize;
 
@@ -1113,9 +1123,9 @@ Data::escapeToStream(EncodeStream& str, Predicate shouldEscape) const
    {
       // ?abr? Why is this special cased? Removing this code
       // does not change the behavior of this method.
-      if (*p == '%' 
-          && e - p > 2 
-          && isHex(*(p+1)) 
+      if (*p == '%'
+          && e - p > 2
+          && isHex(*(p+1))
           && isHex(*(p+2)))
       {
          str.write((char*)p, 3);
@@ -1141,15 +1151,42 @@ inline bool operator!=(const Data& lhs, const Data& rhs) { return !(lhs == rhs);
 inline bool operator>(const Data& lhs, const Data& rhs) { return rhs < lhs; }
 inline bool operator<=(const Data& lhs, const Data& rhs) { return !(rhs < lhs); }
 inline bool operator>=(const Data& lhs, const Data& rhs) { return !(lhs < rhs); }
+
 inline bool operator!=(const Data& lhs, const char* rhs) { return !(lhs == rhs); }
 inline bool operator>(const Data& lhs, const char* rhs) { return rhs < lhs; }
 inline bool operator<=(const Data& lhs, const char* rhs) { return !(rhs < lhs); }
 inline bool operator>=(const Data& lhs, const char* rhs) { return !(lhs < rhs); }
+
 inline bool operator==(const char* lhs, const Data& rhs) { return rhs == lhs; }
 inline bool operator!=(const char* lhs, const Data& rhs) { return !(rhs == lhs); }
 inline bool operator>(const char* lhs, const Data& rhs) { return rhs < lhs; }
 inline bool operator<=(const char* lhs, const Data& rhs) { return !(rhs < lhs); }
 inline bool operator>=(const char* lhs, const Data& rhs) { return !(lhs < rhs); }
+
+inline bool operator!=(const Data& lhs, const std::string& rhs) noexcept { return !(lhs == rhs); }
+inline bool operator>(const Data& lhs, const std::string& rhs) { return rhs < lhs; }
+inline bool operator<=(const Data& lhs, const std::string& rhs) { return !(rhs < lhs); }
+inline bool operator>=(const Data& lhs, const std::string& rhs) { return !(lhs < rhs); }
+
+inline bool operator==(const std::string& lhs, const Data& rhs) noexcept { return rhs == lhs; }
+inline bool operator!=(const std::string& lhs, const Data& rhs) noexcept { return !(rhs == lhs); }
+inline bool operator>(const std::string& lhs, const Data& rhs) { return rhs < lhs; }
+inline bool operator<=(const std::string& lhs, const Data& rhs) { return !(rhs < lhs); }
+inline bool operator>=(const std::string& lhs, const Data& rhs) { return !(lhs < rhs); }
+
+#if RESIP_CPP_STANDARD >= 201703L
+inline bool operator!=(const Data& lhs, const std::string_view rhs) noexcept { return !(lhs == rhs); }
+inline bool operator>(const Data& lhs, const std::string_view rhs) { return rhs < lhs; }
+inline bool operator<=(const Data& lhs, const std::string_view rhs) { return !(rhs < lhs); }
+inline bool operator>=(const Data& lhs, const std::string_view rhs) { return !(lhs < rhs); }
+
+inline bool operator==(const std::string_view lhs, const Data& rhs) noexcept { return rhs == lhs; }
+inline bool operator!=(const std::string_view lhs, const Data& rhs) noexcept { return !(rhs == lhs); }
+inline bool operator>(const std::string_view lhs, const Data& rhs) { return rhs < lhs; }
+inline bool operator<=(const std::string_view lhs, const Data& rhs) { return !(rhs < lhs); }
+inline bool operator>=(const std::string_view lhs, const Data& rhs) { return !(lhs < rhs); }
+#endif
+
 #ifndef  RESIP_USE_STL_STREAMS
 EncodeStream& operator<<(EncodeStream& strm, const Data& d);
 #endif
@@ -1167,56 +1204,20 @@ operator+(const char* c, const Data& d)
 
 bool operator==(const Data& lhs, const Data& rhs);
 bool operator==(const Data& lhs, const char* rhs);
+bool operator==(const Data& lhs, const std::string& rhs) noexcept;
+#if RESIP_CPP_STANDARD >= 201703L
+bool operator==(const Data& lhs, const std::string_view rhs) noexcept;
+#endif
 
 bool operator<(const Data& lhs, const Data& rhs);
 bool operator<(const Data& lhs, const char* rhs);
 bool operator<(const char* lhs, const Data& rhs);
-
-
-inline bool operator==(const resip::Data& lhs, const std::string& rhs) noexcept
-{
-   return lhs.size() == rhs.size() && std::memcmp(lhs.data(), rhs.c_str(), rhs.size()) == 0;
-}
-
-inline bool operator==(const std::string& lhs, const resip::Data& rhs) noexcept
-{
-   return lhs.size() == rhs.size() && std::memcmp(lhs.c_str(), rhs.data(), rhs.size()) == 0;
-}
-
-inline bool operator!=(const resip::Data& lhs, const std::string& rhs) noexcept
-{
-   return !(lhs == rhs);
-}
-
-inline bool operator!=(const std::string& lhs, const resip::Data& rhs) noexcept
-{
-   return !(lhs == rhs);
-}
-
+bool operator<(const Data& lhs, const std::string& rhs) noexcept;
+bool operator<(const std::string& lhs, const Data& rhs) noexcept;
 #if RESIP_CPP_STANDARD >= 201703L
-
-inline bool operator==(const resip::Data& lhs, const std::string_view rhs) noexcept
-{
-   return lhs.size() == rhs.size() && std::memcmp(lhs.data(), rhs.data(), rhs.size()) == 0;
-}
-
-inline bool operator==(const std::string_view lhs, const resip::Data& rhs) noexcept
-{
-   return lhs.size() == rhs.size() && std::memcmp(lhs.data(), rhs.data(), rhs.size()) == 0;
-}
-
-inline bool operator!=(const resip::Data& lhs, const std::string_view rhs) noexcept
-{
-   return !(lhs == rhs);
-}
-
-inline bool operator!=(const std::string_view lhs, const resip::Data& rhs) noexcept
-{
-   return !(lhs == rhs);
-}
-
+bool operator<(const Data& lhs, const std::string_view rhs) noexcept;
+bool operator<(const std::string_view lhs, const Data& rhs) noexcept;
 #endif
-
 }
 
 HashValue(resip::Data);
@@ -1224,22 +1225,22 @@ HashValue(resip::Data);
 #endif
 
 /* ====================================================================
- * The Vovida Software License, Version 1.0 
- * 
+ * The Vovida Software License, Version 1.0
+ *
  * Copyright (c) 2000 Vovida Networks, Inc.  All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 
+ *
  * 3. The names "VOCAL", "Vovida Open Communication Application Library",
  *    and "Vovida Open Communication Application Library (VOCAL)" must
  *    not be used to endorse or promote products derived from this
@@ -1249,7 +1250,7 @@ HashValue(resip::Data);
  * 4. Products derived from this software may not be called "VOCAL", nor
  *    may "VOCAL" appear in their name, without prior written
  *    permission of Vovida Networks, Inc.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
@@ -1263,9 +1264,9 @@ HashValue(resip::Data);
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
  * DAMAGE.
- * 
+ *
  * ====================================================================
- * 
+ *
  * This software consists of voluntary contributions made by Vovida
  * Networks, Inc. and many individuals on behalf of Vovida Networks,
  * Inc.  For more information on Vovida Networks, Inc., please see

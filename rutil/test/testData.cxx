@@ -42,7 +42,7 @@ class TestData
 	   // not reallocated
 	   assert(b == d.data());
 	 }
-	 
+
 	 {
 	   const char* txt = "buffer";
 	   Data d(Data::Share, txt, strlen(txt));
@@ -82,16 +82,16 @@ class TestData
             {
                int length = 16;
                char* buffer = new char [length];
-   
+
                for (int i=0; i<16; ++i)
                {
                   buffer[i] = ' ';
                }
-   
+
                Data target(Data::Take, buffer, length);
                std::cerr << target.c_str() << endl;
             }
-            
+
             {
                Data input("abcdefghij");
                std::cerr << "T0: " << input << std::endl;
@@ -157,7 +157,7 @@ class TestData
                example.replace(from, to);
                assert(example == "bbbb");
             }
-	    
+
             {
                Data from("a");
                Data to("b");
@@ -230,7 +230,7 @@ class TestData
                example.replace(from, to);
                assert(example == "aabraacaadaabraa");
             }
-	    
+
             {
                Data from("abracadabra");
                Data to("a");
@@ -266,14 +266,14 @@ class TestData
             std::cerr << "T1: " << input << std::endl;
             assert(input == "ABCD123ABCDa");
          }
-         
+
          {
             // construct a Data object with binary zero in content
             const char rawInput[] = {'I', 'P', '4', '\0'};
             const Data input(rawInput, sizeof(rawInput));
             assert(input != "IP4");
          }
-         
+
          {
             const char* s = "a";
             const char* ss = "bb";
@@ -368,7 +368,7 @@ class TestData
 
             cerr << needsNoCharEncode.charEncoded() << endl;
 
-            assert(needsNoCharEncode.charEncoded().charUnencoded() == needsNoCharEncode);            
+            assert(needsNoCharEncode.charEncoded().charUnencoded() == needsNoCharEncode);
          }
 
          {
@@ -383,10 +383,10 @@ class TestData
          {
             Data s1;
             assert(s1.convertInt() == 0);
-            
+
             Data s2("12foo");
             assert(s2.convertInt() == 12);
-            
+
             Data s3("12");
             assert(s3.convertInt() == 12);
 
@@ -412,10 +412,10 @@ class TestData
          {
             Data s1;
             assert(s1.convertUnsignedLong() == 0);
-            
+
             Data s2("12foo");
             assert(s2.convertUnsignedLong() == 12);
-            
+
             Data s3("12");
             assert(s3.convertUnsignedLong() == 12);
 
@@ -438,10 +438,10 @@ class TestData
          {
             Data s1;
             assert(s1.convertUInt64() == 0);
-            
+
             Data s2("12foo");
             assert(s2.convertUInt64() == 12);
-            
+
             Data s3("12");
             assert(s3.convertUInt64() == 12);
 
@@ -464,10 +464,10 @@ class TestData
          {
             Data s1;
             assert(s1.convertSize() == 0);
-            
+
             Data s2("12foo");
             assert(s2.convertSize() == 12);
-            
+
             Data s3("12");
             assert(s3.convertSize() == 12);
 
@@ -581,8 +581,8 @@ class TestData
             Data d;
             const char *q = "\0";
             d += q;
-           
-            for(const char *p = 
+
+            for(const char *p =
                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -608,7 +608,7 @@ class TestData
                d += q;
                d += "~";
             }
-           
+
          }
 
          {
@@ -758,7 +758,7 @@ class TestData
                d = f;
                assert(d <= f);
             }
-         
+
             {
                Data a("qwerty");
                Data b("qwerty");
@@ -875,7 +875,7 @@ class TestData
             const char *txt = "here is some text";
             Data notOwner(Data::Share, txt, strlen(txt));
             assert(notOwner.mShareEnum == Data::Share);
-            
+
             notOwner += " more text";
             assert(notOwner.mShareEnum == Data::Take);
             assert(notOwner == "here is some text more text");
@@ -885,7 +885,7 @@ class TestData
             const char *txt = "here is some text";
             Data notOwner(Data::Share, txt, strlen(txt));
             assert(notOwner.mShareEnum == Data::Share);
-            
+
             notOwner += '!';
             assert(notOwner.mShareEnum == Data::Take);
             assert(notOwner == "here is some text!");
@@ -895,7 +895,7 @@ class TestData
             const char *txt = "here is some text";
             Data notOwner(Data::Share, txt, strlen(txt));
             assert(notOwner.mShareEnum == Data::Share);
-            
+
             notOwner += Data(" more text");
             assert(notOwner.mShareEnum == Data::Take);
             assert(notOwner == "here is some text more text");
@@ -931,7 +931,7 @@ class TestData
             Data transport("transport");
             assert(isEqualNoCase(transport, "transport"));
          }
-         
+
          {
             Data d1("0123456789");
             assert(d1.find("0") == 0);
@@ -945,7 +945,7 @@ class TestData
             assert(d1.find("0123456789a") == Data::npos);
 
             Data d2;
-            assert(d2.find("0") == Data::npos);            
+            assert(d2.find("0") == Data::npos);
             assert(d2.find("abc") == Data::npos);
             assert(d2.find("") == Data::npos);
          }
@@ -1077,7 +1077,7 @@ class TestData
             assert((unsigned char)raw[0] == 0xd3);
             assert((unsigned char)raw[15] == 0x00);
          }
-         
+
          {
             Data d("012345");
             assert(d[0] == '0');
@@ -1113,7 +1113,7 @@ class TestData
             assert(Data(0) == "0");
             assert(Data(1) == "1");
             assert(Data(-1) == "-1");
-            assert(Data(11) == "11");      
+            assert(Data(11) == "11");
             assert(Data(1234567) == "1234567");
             assert(Data(-1234567) == "-1234567");
          }
@@ -1141,11 +1141,11 @@ class TestData
             assert(Data(0.21347) == "0.2135");
             assert(Data(-0.21347) == "-0.2135");
             assert(Data(-0.21344) == "-0.2134");
-            cerr << "!! " << Data(-123454.21344, Data::FiveDigitPrecision) << endl;            
+            cerr << "!! " << Data(-123454.21344, Data::FiveDigitPrecision) << endl;
             assert(Data(-123454.21344, Data::FiveDigitPrecision) == "-123454.21344");
             assert(Data(-123454.21344, Data::SevenDigitPrecision) == "-123454.21344");
          }
-#endif      
+#endif
          {
             Data empt;
             Data empt1;
@@ -1159,7 +1159,7 @@ class TestData
             assert(!(empt != empt1));
             assert(!(empt1 != empt));
             assert(!(empt1 != ""));
-      
+
             assert(empt1 == "");
             assert("sdf" != empt1);
             assert(Data("SAfdsaf") != empt1);
@@ -1177,7 +1177,7 @@ class TestData
             assert(strcmp(d.data(), "qwerty") == 0);
 
             Data e;
-            
+
             assert(e == "");
          }
 
@@ -1218,14 +1218,14 @@ class TestData
             s += "\r\n";
             assert (s == "c=foo\r\nbar\r\n");
          }
-         
+
          {
             Data s;
             s += 'c';
             assert(s == "c");
             assert(s.size() == 1);
          }
-         
+
          {
             Data s;
             s = "c=";
@@ -1247,10 +1247,10 @@ class TestData
             Data a("one");
             Data b("two");
             Data c("three");
-      
+
             assert(a+b+c == "onetwothree");
          }
-   
+
          {
             Data d("one");
             cerr << "one + two = " << (d + "two") << endl;
@@ -1299,15 +1299,15 @@ class TestData
             char o[] = "S";
             Data d(Data::Share, s, strlen(s));
             Data c(Data::Share, o, strlen(o));
-            
+
             d = c;
             assert(c == "S");
-         }         
+         }
          {
             Data d((uint64_t)235235);
             assert(d == "235235");
          }
- 
+
          if (1)
          {
             Data d3("MTIz"); Data e3("123" );
@@ -1315,35 +1315,35 @@ class TestData
             //cerr << "base64 test " <<d3<< " = "<< e3.base64encode().c_str()<<endl;
             assert( d3.base64decode() == e3 );
             assert( e3.base64encode() == d3 );
-            
+
             Data d1("MQ=="); Data e1("1" );
             //cerr << "base64 test "<<e1<<" = <"<<d1.base64decode()<<">"<<endl;
             //cerr << "base64 test hex "<<e1.hex()<<" = <"<<d1.base64decode().hex()<<">"<<endl;
             //cerr << "base64 test "<<d1<<" = <"<<e1.base64encode()<<">"<<endl;
             assert( e1 == d1.base64decode() );
             assert( e1.base64encode() == d1 );
-          
+
             Data d2("MTI=");
             assert( d2.base64decode() == Data("12" ) );
             assert(  Data("12" ).base64encode() == d2 );
-            
+
             Data d4("MTIzNA==");
             assert( d4.base64decode() == Data("1234" ) );
             assert(  Data("1234" ).base64encode() == d4 );
-            
+
             Data d5("MTIzNDU=");
             assert( d5.base64decode() == Data("12345" ) );
             assert(  Data("12345" ).base64encode() == d5 );
-            
+
             Data d6("MTIzNDU2");
             assert( d6.base64decode() == Data("123456" ) );
             assert(  Data("123456" ).base64encode() == d6 );
-            
+
             Data d7("MTIzNDU2Nw==");
             assert( d7.base64decode() == Data("1234567" ) );
             assert(  Data("1234567" ).base64encode() == d7 );
          }
-         
+
          {
             // RFC 4648 Base64 test vectors
             const unsigned char rawInput1[] = { 0x14, 0xfb, 0x9c, 0x03, 0xd9, 0x7e };
@@ -1497,66 +1497,100 @@ class TestData
 
          {
             std::string str1 = "resip";
-            resip::Data d1(str1);
+            Data d1(str1);
 
-            resip_assert(d1 == str1);
-            resip_assert(str1 == d1);
-            resip_assert(d1.toString() == str1);
+            assert(d1 == str1);
+            assert(str1 == d1);
+            assert(d1.toString() == str1);
          }
 
          {
             std::string str1 = "resip";
-            resip::Data d1 = str1;
+            Data d1 = str1;
 
-            resip_assert(d1 == str1);
-            resip_assert(str1 == d1);
-            resip_assert(d1.toString() == str1);
+            assert(d1 == str1);
+            assert(str1 == d1);
+            assert(d1.toString() == str1);
          }
 
 
          {
             std::string str1 = "resip";
-            resip::Data d1 = "resipr";
-            resip_assert(d1 != str1);
-            resip_assert(str1 != d1);
-            resip_assert(d1.toString() != str1);
+            Data d1 = "resipr";
+            assert(d1 != str1);
+            assert(str1 != d1);
+            assert(d1.toString() != str1);
 
-            resip::Data d2(std::string("resipr"));
-            resip_assert(d2 != str1);
-            resip_assert(str1 != d2);
-            resip_assert(d2.toString() != str1);
+            Data d2(std::string("resipr"));
+            assert(d2 != str1);
+            assert(str1 != d2);
+            assert(d2.toString() != str1);
          }
 
          {
-            resip::Data d1("resip");
+            Data d1("resip");
             std::string str1 = d1;
-            resip_assert(str1 == d1);
-            resip_assert(d1 == str1);
+            assert(str1 == d1);
+            assert(d1 == str1);
          }
 
          {
-            resip::Data d1("resip");
+            Data d1("resip");
             std::string str1(d1);
-            resip_assert(str1 == d1);
-            resip_assert(d1 == str1);
+            assert(str1 == d1);
+            assert(d1 == str1);
          }
 
          {
-            resip::Data d1("resip");
+            Data d1("resip");
             std::string str1 = d1;
 
-            resip::Data d2("resip2");
-            resip_assert(str1 != d2);
-            resip_assert(d2 != str1);
+            Data d2("resip2");
+            assert(str1 != d2);
+            assert(d2 != str1);
          }
 
          {
-            resip::Data d1("resip");
+            Data d1("resip");
             std::string str1(d1);
 
-            resip::Data d2("resip2");
-            resip_assert(str1 != d2);
-            resip_assert(d2 != str1);
+            Data d2("resip2");
+            assert(str1 != d2);
+            assert(d2 != str1);
+         }
+
+         {
+            Data data("abc");
+            std::string strA = "abc";
+            std::string strB = "abcd";
+
+            // Test `<`
+            assert((data < strB) == true);
+            assert((data < strA) == false);
+
+            assert((strB < data) == false);
+            assert((strA < data) == false);
+
+            // Test `>`
+            assert((data > strB) == false);
+            assert((data > strA) == false);
+
+            assert((strB > data) == true);
+            assert((strA > data) == false);
+
+            // Test `<=`
+            assert((data <= strB) == true);
+            assert((data <= strA) == true);
+
+            assert((strB <= data) == false);
+            assert((strA <= data) == true);
+
+            // Test `>=`
+            assert((data >= strB) == false);
+            assert((data >= strA) == true);
+
+            assert((strB >= data) == true);
+            assert((strA >= data) == true);
          }
 
 
@@ -1564,67 +1598,101 @@ class TestData
 
          {
             std::string_view sv1 = "resip";
-            resip::Data d1(sv1);
+            Data d1(sv1);
 
-            resip_assert(d1 == sv1);
-            resip_assert(sv1 == d1);
-            resip_assert(d1.toStringView() == sv1);
+            assert(d1 == sv1);
+            assert(sv1 == d1);
+            assert(d1.toStringView() == sv1);
          }
 
          {
             std::string_view sv1 = "resip";
-            resip::Data d1 = sv1;
+            Data d1 = sv1;
 
-            resip_assert(d1 == sv1);
-            resip_assert(sv1 == d1);
-            resip_assert(d1.toStringView() == sv1);
+            assert(d1 == sv1);
+            assert(sv1 == d1);
+            assert(d1.toStringView() == sv1);
          }
 
 
          {
             std::string_view sv1 = "resip";
-            resip::Data d1 = "resipr";
-            resip_assert(d1 != sv1);
-            resip_assert(sv1 != d1);
-            resip_assert(d1.toStringView() != sv1);
+            Data d1 = "resipr";
+            assert(d1 != sv1);
+            assert(sv1 != d1);
+            assert(d1.toStringView() != sv1);
 
 
-            resip::Data d2(std::string_view("resipr"));
-            resip_assert(d2 != sv1);
-            resip_assert(sv1 != d2);
-            resip_assert(d2.toStringView() != sv1);
+            Data d2(std::string_view("resipr"));
+            assert(d2 != sv1);
+            assert(sv1 != d2);
+            assert(d2.toStringView() != sv1);
          }
 
          {
-            resip::Data d1("resip");
+            Data d1("resip");
             std::string_view str1 = d1;
-            resip_assert(str1 == d1);
-            resip_assert(d1 == str1);
+            assert(str1 == d1);
+            assert(d1 == str1);
          }
 
          {
-            resip::Data d1("resip");
+            Data d1("resip");
             std::string_view str1(d1);
-            resip_assert(str1 == d1);
-            resip_assert(d1 == str1);
+            assert(str1 == d1);
+            assert(d1 == str1);
          }
 
          {
-            resip::Data d1("resip");
+            Data d1("resip");
             std::string_view str1 = d1;
 
-            resip::Data d2("resip2");
-            resip_assert(str1 != d2);
-            resip_assert(d2 != str1);
+            Data d2("resip2");
+            assert(str1 != d2);
+            assert(d2 != str1);
          }
 
          {
-            resip::Data d1("resip");
+            Data d1("resip");
             std::string_view str1(d1);
 
-            resip::Data d2("resip2");
-            resip_assert(str1 != d2);
-            resip_assert(d2 != str1);
+            Data d2("resip2");
+            assert(str1 != d2);
+            assert(d2 != str1);
+         }
+
+         {
+            Data data("abc");
+            std::string_view viewA = "abc";
+            std::string_view viewB = "abcd";
+
+            // Test `<`
+            assert((data < viewB) == true);
+            assert((data < viewA) == false);
+
+            assert((viewB < data) == false);
+            assert((viewA < data) == false);
+
+            // Test `>`
+            assert((data > viewB) == false);
+            assert((data > viewA) == false);
+
+            assert((viewB > data) == true);
+            assert((viewA > data) == false);
+
+            // Test `<=`
+            assert((data <= viewB) == true);
+            assert((data <= viewA) == true);
+
+            assert((viewB <= data) == false);
+            assert((viewA <= data) == true);
+
+            // Test `>=`
+            assert((data >= viewB) == false);
+            assert((data >= viewA) == true);
+
+            assert((viewB >= data) == true);
+            assert((viewA >= data) == true);
          }
 #endif
 
@@ -1641,22 +1709,22 @@ main()
    return rVal;
 }
 /* ====================================================================
- * The Vovida Software License, Version 1.0 
- * 
+ * The Vovida Software License, Version 1.0
+ *
  * Copyright (c) 2000 Vovida Networks, Inc.  All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 
+ *
  * 3. The names "VOCAL", "Vovida Open Communication Application Library",
  *    and "Vovida Open Communication Application Library (VOCAL)" must
  *    not be used to endorse or promote products derived from this
@@ -1666,7 +1734,7 @@ main()
  * 4. Products derived from this software may not be called "VOCAL", nor
  *    may "VOCAL" appear in their name, without prior written
  *    permission of Vovida Networks, Inc.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
@@ -1680,9 +1748,9 @@ main()
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
  * DAMAGE.
- * 
+ *
  * ====================================================================
- * 
+ *
  * This software consists of voluntary contributions made by Vovida
  * Networks, Inc. and many individuals on behalf of Vovida Networks,
  * Inc.  For more information on Vovida Networks, Inc., please see
