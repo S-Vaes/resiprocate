@@ -243,6 +243,7 @@ class DialogUsageManager : public HandleManager, public TransactionUser
                                                   const std::shared_ptr<UserProfile>& userProfile,
                                                   const Contents& body,
                                                   const Data& eventType,
+                                                  bool shouldDropContents = true,
                                                   AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makePublication(const NameAddr& target,
                                             const Contents& body,
@@ -311,6 +312,8 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       InviteSessionHandle findInviteSession(DialogId id);
       //if the handle is inValid, int represents the errorcode
       std::pair<InviteSessionHandle, int> findInviteSession(CallId replaces);
+
+      ClientPublicationHandle findClientPublication(DialogSetId id);
 
       ClientPublicationHandler* getClientPublicationHandler(const Data& eventType);
       ServerPublicationHandler* getServerPublicationHandler(const Data& eventType);
@@ -440,8 +443,8 @@ class DialogUsageManager : public HandleManager, public TransactionUser
             }
       };
 
-      DialogSet* makeUacDialogSet(BaseCreator* creator, AppDialogSet* appDs);
-      std::shared_ptr<SipMessage> makeNewSession(BaseCreator* creator, AppDialogSet* appDs);
+      DialogSet* makeUacDialogSet(BaseCreator* creator, AppDialogSet* appDs, bool shouldDropContents = true);
+      std::shared_ptr<SipMessage> makeNewSession(BaseCreator* creator, AppDialogSet* appDs, bool shouldDropContents = true);
 
       // makes a proto response to a request
       void makeResponse(SipMessage& response,

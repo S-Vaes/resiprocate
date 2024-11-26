@@ -28,7 +28,7 @@ class DialogSet
       DialogSet(BaseCreator* creator, DialogUsageManager& dum);
       DialogSet(const SipMessage& request, DialogUsageManager& dum);
       virtual ~DialogSet();
-      
+
       DialogSetId getId() const;
       void addDialog(Dialog*);
       bool empty() const noexcept;
@@ -41,7 +41,7 @@ class DialogSet
       void end(const ParserContainer<Token>& endReasons);
       void end();
       void dispatch(const SipMessage& msg);
-      
+
       ClientRegistrationHandle getClientRegistration();
       ServerRegistrationHandle getServerRegistration();
       ClientPublicationHandle getClientPublication();
@@ -50,12 +50,15 @@ class DialogSet
 
       bool isDestroying() const noexcept { return mState == Destroying; };
 
+      void setShouldDropContents(bool drop) { mShouldDropContents = drop; }
+      bool getShouldDropContents() const { return mShouldDropContents; }
+
    private:
       friend class Dialog;
       friend class DialogUsage;
       friend class ClientInviteSession;
       friend class NonDialogUsage;
-      friend class DialogUsageManager;      
+      friend class DialogUsageManager;
       friend class ClientRegistration;
       friend class ServerRegistration;
       friend class ClientOutOfDialogReq;
@@ -64,7 +67,7 @@ class DialogSet
       friend class RedirectManager;
       friend class ClientPagerMessage;
       friend class ServerPagerMessage;
-      
+
       typedef enum
       {
          Initial,  // No session setup yet
@@ -100,10 +103,10 @@ class DialogSet
 
       ServerRegistration* makeServerRegistration(const SipMessage& msg);
       ServerOutOfDialogReq* makeServerOutOfDialog(const SipMessage& msg);
-      
-      ServerPagerMessage* makeServerPagerMessage(const SipMessage& request);      
 
-      void dispatchToAllDialogs(const SipMessage& msg);      
+      ServerPagerMessage* makeServerPagerMessage(const SipMessage& request);
+
+      void dispatchToAllDialogs(const SipMessage& msg);
 
       void flowTerminated(const Tuple& flow);
 
@@ -132,9 +135,12 @@ class DialogSet
       void addEndReasonToMessage(SipMessage& msg);
 
       friend EncodeStream& operator<<(EncodeStream& strm, const DialogSet& ds);
+
+      // Publish drop contents hack?
+      bool mShouldDropContents{true};
 };
 
-EncodeStream& 
+EncodeStream&
 operator<<(EncodeStream& strm, const DialogSet& ds);
 
 }
@@ -142,22 +148,22 @@ operator<<(EncodeStream& strm, const DialogSet& ds);
 #endif
 
 /* ====================================================================
- * The Vovida Software License, Version 1.0 
- * 
+ * The Vovida Software License, Version 1.0
+ *
  * Copyright (c) 2000 Vovida Networks, Inc.  All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 
+ *
  * 3. The names "VOCAL", "Vovida Open Communication Application Library",
  *    and "Vovida Open Communication Application Library (VOCAL)" must
  *    not be used to endorse or promote products derived from this
@@ -167,7 +173,7 @@ operator<<(EncodeStream& strm, const DialogSet& ds);
  * 4. Products derived from this software may not be called "VOCAL", nor
  *    may "VOCAL" appear in their name, without prior written
  *    permission of Vovida Networks, Inc.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
@@ -181,9 +187,9 @@ operator<<(EncodeStream& strm, const DialogSet& ds);
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
  * DAMAGE.
- * 
+ *
  * ====================================================================
- * 
+ *
  * This software consists of voluntary contributions made by Vovida
  * Networks, Inc. and many individuals on behalf of Vovida Networks,
  * Inc.  For more information on Vovida Networks, Inc., please see

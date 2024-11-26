@@ -15,7 +15,7 @@
 
 using namespace resip;
 
-ClientPublicationHandle 
+ClientPublicationHandle
 ClientPublication::getHandle()
 {
    return ClientPublicationHandle(mDum, getBaseHandle().getId());
@@ -32,14 +32,15 @@ ClientPublication::ClientPublication(DialogUsageManager& dum,
      mPublish(req),
      mEventType(mPublish->header(h_Event).value()),
      mTimerSeq(0),
-     mDocument(mPublish->releaseContents().release())
+     mDocument(mPublish->releaseContents().release()),
+     mShouldDropContents(dialogSet.getShouldDropContents())
 {
-   DebugLog( << "ClientPublication::ClientPublication: " << mId);   
+   InfoLog( << "ClientPublication::ClientPublication: " << mId );
 }
 
 ClientPublication::~ClientPublication()
 {
-   DebugLog( << "ClientPublication::~ClientPublication: " << mId);   
+   DebugLog( << "ClientPublication::~ClientPublication: " << mId);
    mDialogSet.mClientPublication = 0;
    delete mDocument;
 }
@@ -110,11 +111,11 @@ ClientPublication::endCommand(bool immediate)
    mDum.post(new ClientPublicationEndCommand(getHandle(), immediate));
 }
 
-void 
+void
 ClientPublication::dispatch(const SipMessage& msg)
 {
    ClientPublicationHandler* handler = mDum.getClientPublicationHandler(mEventType);
-   resip_assert(handler);   
+   resip_assert(handler);
 
    if (msg.isRequest())
    {
@@ -144,11 +145,11 @@ ClientPublication::dispatch(const SipMessage& msg)
          {
             mPublish->header(h_SIPIfMatch) = msg.header(h_SIPETag);
             if(!mPendingPublish)
-            {
-               mPublish->releaseContents();
-            }
-            mDum.addTimer(DumTimeout::Publication, 
-                          Helper::aBitSmallerThan(msg.header(h_Expires).value()), 
+               {
+                  mPublish->releaseContents();
+               }
+            mDum.addTimer(DumTimeout::Publication,
+                          Helper::aBitSmallerThan(msg.header(h_Expires).value()),
                           getBaseHandle(),
                           ++mTimerSeq);
             handler->onSuccess(getHandle(), msg);
@@ -156,7 +157,7 @@ ClientPublication::dispatch(const SipMessage& msg)
          else
          {
             // Any PUBLISH/200 must have an ETag. This should not happen. Not
-            // sure what the app can do in this case. 
+            // sure what the app can do in this case.
             WarningLog (<< "PUBLISH/200 received with no ETag " << mPublish->header(h_From).uri());
             handler->onFailure(getHandle(), msg);
             delete this;
@@ -171,7 +172,7 @@ ClientPublication::dispatch(const SipMessage& msg)
             mPublish->remove(h_SIPIfMatch);
             update(mDocument);
             return;
-         }         
+         }
          else if (code == 423) // interval too short
          {
             if (msg.exists(h_MinExpires))
@@ -223,10 +224,10 @@ ClientPublication::dispatch(const SipMessage& msg)
             {
                retry = resipMax(retry, retryMinimum);
                DebugLog(<< "Application requested delayed retry on Retry-After: " << retry);
-               mDum.addTimer(DumTimeout::Publication, 
-                             retry, 
+               mDum.addTimer(DumTimeout::Publication,
+                             retry,
                              getBaseHandle(),
-                             ++mTimerSeq);       
+                             ++mTimerSeq);
                return;
             }
          }
@@ -263,7 +264,7 @@ ClientPublication::dispatch(const SipMessage& msg)
    }
 }
 
-void 
+void
 ClientPublication::dispatch(const DumTimeout& timer)
 {
     if (timer.seq() == mTimerSeq)
@@ -278,6 +279,9 @@ ClientPublication::refresh(unsigned int expiration)
    if (expiration != 0)
    {
        mPublish->header(h_Expires).value() = expiration;
+   }
+   if(!mShouldDropContents) {
+      mPublish->setContents(mDocument);
    }
    send(mPublish);
 }
@@ -370,7 +374,7 @@ ClientPublication::updateCommand(const Contents* body)
    mDum.post(new ClientPublicationUpdateCommand(getHandle(), body));
 }
 
-void 
+void
 ClientPublication::send(std::shared_ptr<SipMessage> request)
 {
    if (mWaitingForResponse)
@@ -386,31 +390,35 @@ ClientPublication::send(std::shared_ptr<SipMessage> request)
    }
 }
 
-EncodeStream& 
+EncodeStream&
 ClientPublication::dump(EncodeStream& strm) const
 {
    strm << "ClientPublication " << mId << " " << mPublish->header(h_From).uri();
    return strm;
 }
 
+void ClientPublication::setShouldDropContents(bool shouldDropContents) {
+   mShouldDropContents = shouldDropContents;
+}
+
 /* ====================================================================
- * The Vovida Software License, Version 1.0 
- * 
+ * The Vovida Software License, Version 1.0
+ *
  * Copyright (c) 2000 Vovida Networks, Inc.  All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
 
  *    distribution.
- * 
+ *
  * 3. The names "VOCAL", "Vovida Open Communication Application Library",
  *    and "Vovida Open Communication Application Library (VOCAL)" must
  *    not be used to endorse or promote products derived from this
@@ -420,7 +428,7 @@ ClientPublication::dump(EncodeStream& strm) const
  * 4. Products derived from this software may not be called "VOCAL", nor
  *    may "VOCAL" appear in their name, without prior written
  *    permission of Vovida Networks, Inc.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
@@ -434,9 +442,9 @@ ClientPublication::dump(EncodeStream& strm) const
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
  * DAMAGE.
- * 
+ *
  * ====================================================================
- * 
+ *
  * This software consists of voluntary contributions made by Vovida
  * Networks, Inc. and many individuals on behalf of Vovida Networks,
  * Inc.  For more information on Vovida Networks, Inc., please see
