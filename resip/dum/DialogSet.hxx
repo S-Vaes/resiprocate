@@ -50,9 +50,6 @@ class DialogSet
 
       bool isDestroying() const noexcept { return mState == Destroying; };
 
-      void setShouldDropContents(bool drop) { mShouldDropContents = drop; }
-      bool getShouldDropContents() const { return mShouldDropContents; }
-
    private:
       friend class Dialog;
       friend class DialogUsage;
@@ -135,9 +132,6 @@ class DialogSet
       void addEndReasonToMessage(SipMessage& msg);
 
       friend EncodeStream& operator<<(EncodeStream& strm, const DialogSet& ds);
-
-      // Publish drop contents hack?
-      bool mShouldDropContents{true};
 };
 
 EncodeStream&

@@ -32,10 +32,9 @@ ClientPublication::ClientPublication(DialogUsageManager& dum,
      mPublish(req),
      mEventType(mPublish->header(h_Event).value()),
      mTimerSeq(0),
-     mDocument(mPublish->releaseContents().release()),
-     mShouldDropContents(dialogSet.getShouldDropContents())
+     mDocument(mPublish->releaseContents().release())
 {
-   InfoLog( << "ClientPublication::ClientPublication: " << mId );
+   DebugLog( << "ClientPublication::ClientPublication: " << mId );
 }
 
 ClientPublication::~ClientPublication()
@@ -280,7 +279,7 @@ ClientPublication::refresh(unsigned int expiration)
    {
        mPublish->header(h_Expires).value() = expiration;
    }
-   if(!mShouldDropContents) {
+   if(mResendDocumentOnRefresh) {
       mPublish->setContents(mDocument);
    }
    send(mPublish);
@@ -397,8 +396,12 @@ ClientPublication::dump(EncodeStream& strm) const
    return strm;
 }
 
-void ClientPublication::setShouldDropContents(bool shouldDropContents) {
-   mShouldDropContents = shouldDropContents;
+void ClientPublication::setResendDocumentOnRefresh(bool resendDocumentOnRefresh) {
+   mResendDocumentOnRefresh = resendDocumentOnRefresh;
+}
+
+bool ClientPublication::getResendDocumentOnRefresh() const {
+   return mResendDocumentOnRefresh;
 }
 
 /* ====================================================================

@@ -38,7 +38,8 @@ class ClientPublication : public NonDialogUsage
       void dispatch(const DumTimeout& timer) override;
 
       EncodeStream& dump(EncodeStream& strm) const override;
-      void setShouldDropContents(bool shouldDropContents);
+      void setResendDocumentOnRefresh(bool resendDocumentOnRefresh);
+      bool getResendDocumentOnRefresh() const;
 
    protected:
       virtual ~ClientPublication();
@@ -51,7 +52,7 @@ class ClientPublication : public NonDialogUsage
       bool mWaitingForResponse;
       bool mPendingPublish;
       bool mPendingEnd;
-      bool mShouldDropContents{ true };
+      bool mResendDocumentOnRefresh{ false };
 
       std::shared_ptr<SipMessage> mPublish;
       Data mEventType;

@@ -511,7 +511,7 @@ DialogUsageManager::clearExternalMessageHandler()
 
 
 DialogSet*
-DialogUsageManager::makeUacDialogSet(BaseCreator* creator, AppDialogSet* appDs, bool shouldDropContents)
+DialogUsageManager::makeUacDialogSet(BaseCreator* creator, AppDialogSet* appDs)
 {
    threadCheck();
    if (mDumShutdownHandler)
@@ -524,7 +524,6 @@ DialogUsageManager::makeUacDialogSet(BaseCreator* creator, AppDialogSet* appDs, 
       appDs = new AppDialogSet(*this);
    }
    DialogSet* ds = new DialogSet(creator, *this);
-   ds->setShouldDropContents(false);
 
    appDs->mDialogSet = ds;
    ds->mAppDialogSet = appDs;
@@ -537,9 +536,9 @@ DialogUsageManager::makeUacDialogSet(BaseCreator* creator, AppDialogSet* appDs, 
 }
 
 std::shared_ptr<SipMessage>
-DialogUsageManager::makeNewSession(BaseCreator* creator, AppDialogSet* appDs, bool shouldDropContents)
+DialogUsageManager::makeNewSession(BaseCreator* creator, AppDialogSet* appDs)
 {
-   makeUacDialogSet(creator, appDs, shouldDropContents);
+   makeUacDialogSet(creator, appDs);
    return creator->getLastRequest();
 }
 
@@ -868,13 +867,12 @@ DialogUsageManager::makePublication(const NameAddr& targetDocument,
                                     const std::shared_ptr<UserProfile>& userProfile,
                                     const Contents& body,
                                     const Data& eventType,
-                                    bool shouldDropContents,
                                     AppDialogSet* appDs) {
    resip_assert(mDialogSetMap.find(dialogSetId) == mDialogSetMap.end());
    BaseCreator* creator(new PublicationCreator(*this, targetDocument, userProfile, body, eventType, userProfile->getDefaultPublicationTime()));
    creator->getLastRequest()->header(h_CallID).value() = dialogSetId.getCallId();
    creator->getLastRequest()->header(h_From).param(p_tag) = dialogSetId.getLocalTag();
-   return makeNewSession(creator, appDs, shouldDropContents);
+   return makeNewSession(creator, appDs);
 }
 
 std::shared_ptr<SipMessage>
