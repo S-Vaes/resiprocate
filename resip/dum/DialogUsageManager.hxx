@@ -221,9 +221,13 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       std::shared_ptr<SipMessage> makeSubscription(const NameAddr& target, const std::shared_ptr<UserProfile>& userProfile, const Data& eventType, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeSubscription(const NameAddr& target, const DialogSetId& dialogSetId, const std::shared_ptr<UserProfile>& userProfile, const Data& eventType, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeSubscription(const NameAddr& target, const std::shared_ptr<UserProfile>& userProfile, const Data& eventType,
-                                             uint32_t subscriptionTime, AppDialogSet* = nullptr);
+                                                   uint32_t subscriptionTime, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeSubscription(const NameAddr& target, const std::shared_ptr<UserProfile>& userProfile, const Data& eventType,
-                                             uint32_t subscriptionTime, int refreshInterval, AppDialogSet* = nullptr);
+                                                   uint32_t subscriptionTime, int refreshInterval, AppDialogSet* = nullptr);
+      std::shared_ptr<SipMessage> makeSubscription(const NameAddr& target, const DialogSetId& dialogSetId, const std::shared_ptr<UserProfile>& userProfile, const Data& eventType,
+                                                   uint32_t subscriptionTime, AppDialogSet* = nullptr);
+      std::shared_ptr<SipMessage> makeSubscription(const NameAddr& target, const DialogSetId& dialogSetId, const std::shared_ptr<UserProfile>& userProfile, const Data& eventType,
+                                                   uint32_t subscriptionTime, int refreshInterval, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeSubscription(const NameAddr& target, const Data& eventType, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeSubscription(const NameAddr& target, const Data& eventType, uint32_t subscriptionTime, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeSubscription(const NameAddr& target, const Data& eventType,
@@ -246,6 +250,13 @@ class DialogUsageManager : public HandleManager, public TransactionUser
                                                   const Data& eventType,
                                                   AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makePublication(const NameAddr& target,
+                                                  const DialogSetId& dialogSetId,
+                                                  const std::shared_ptr<UserProfile>& userProfile,
+                                                  const Contents& body,
+                                                  const Data& eventType,
+                                                  uint32_t expiresSeconds,
+                                                  AppDialogSet* = nullptr);
+      std::shared_ptr<SipMessage> makePublication(const NameAddr& target,
                                             const Contents& body,
                                             const Data& eventType,
                                             uint32_t expiresSeconds,
@@ -254,6 +265,7 @@ class DialogUsageManager : public HandleManager, public TransactionUser
       std::shared_ptr<SipMessage> makeRegistration(const NameAddr& target, const std::shared_ptr<UserProfile>& userProfile, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeRegistration(const NameAddr& target, const DialogSetId& dialogSetId, const std::shared_ptr<UserProfile>& userProfile, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeRegistration(const NameAddr& target, const std::shared_ptr<UserProfile>& userProfile, uint32_t registrationTime, AppDialogSet* = nullptr);
+      std::shared_ptr<SipMessage> makeRegistration(const NameAddr& target, const DialogSetId& dialogSetId, const std::shared_ptr<UserProfile>& userProfile, uint32_t registrationTime, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeRegistration(const NameAddr& target, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeRegistration(const NameAddr& target, uint32_t registrationTime, AppDialogSet* = nullptr);
 

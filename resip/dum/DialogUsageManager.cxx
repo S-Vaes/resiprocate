@@ -807,6 +807,28 @@ DialogUsageManager::makeSubscription(const NameAddr& target, const std::shared_p
 }
 
 std::shared_ptr<SipMessage>
+DialogUsageManager::makeSubscription(const NameAddr& target, const DialogSetId& dialogSetId, const std::shared_ptr<UserProfile>& userProfile, const Data& eventType,
+                                     uint32_t subscriptionTime, AppDialogSet* appDs)
+{
+    resip_assert(userProfile.get());
+    BaseCreator* creator(new SubscriptionCreator(*this, target, userProfile, eventType, subscriptionTime));
+    creator->getLastRequest()->header(h_CallID).value() = dialogSetId.getCallId();
+    creator->getLastRequest()->header(h_From).param(p_tag) = dialogSetId.getLocalTag();
+    return makeNewSession(creator, appDs);
+}
+
+std::shared_ptr<SipMessage>
+DialogUsageManager::makeSubscription(const NameAddr& target, const DialogSetId& dialogSetId, const std::shared_ptr<UserProfile>& userProfile, const Data& eventType,
+                                      uint32_t subscriptionTime, int refreshInterval, AppDialogSet* appDs)
+{
+    resip_assert(userProfile.get());
+    BaseCreator* creator(new SubscriptionCreator(*this, target, userProfile, eventType, subscriptionTime, refreshInterval));
+    creator->getLastRequest()->header(h_CallID).value() = dialogSetId.getCallId();
+    creator->getLastRequest()->header(h_From).param(p_tag) = dialogSetId.getLocalTag();
+    return makeNewSession(creator, appDs);
+}
+
+std::shared_ptr<SipMessage>
 DialogUsageManager::makeSubscription(const NameAddr& target, const Data& eventType, AppDialogSet* appDs)
 {
    return makeNewSession(new SubscriptionCreator(*this, target, getMasterUserProfile(), eventType, getMasterProfile()->getDefaultSubscriptionTime()), appDs);
@@ -849,6 +871,15 @@ DialogUsageManager::makeRegistration(const NameAddr& target, const std::shared_p
 }
 
 std::shared_ptr<SipMessage>
+DialogUsageManager::makeRegistration(const NameAddr& target, const DialogSetId& dialogSetId, const std::shared_ptr<UserProfile>& userProfile, uint32_t registrationTime, AppDialogSet* appDs) {
+    resip_assert(mDialogSetMap.find(dialogSetId) == mDialogSetMap.end());
+    BaseCreator* creator(new RegistrationCreator(*this, target, userProfile, registrationTime));
+    creator->getLastRequest()->header(h_CallID).value() = dialogSetId.getCallId();
+    creator->getLastRequest()->header(h_From).param(p_tag) = dialogSetId.getLocalTag();
+    return makeNewSession(creator, appDs);
+}
+
+std::shared_ptr<SipMessage>
 DialogUsageManager::makeRegistration(const NameAddr& target, AppDialogSet* appDs)
 {
    return makeNewSession(new RegistrationCreator(*this, target, getMasterUserProfile(), getMasterProfile()->getDefaultRegistrationTime()), appDs);
@@ -880,6 +911,21 @@ DialogUsageManager::makePublication(const NameAddr& targetDocument,
                                     AppDialogSet* appDs) {
    resip_assert(mDialogSetMap.find(dialogSetId) == mDialogSetMap.end());
    BaseCreator* creator(new PublicationCreator(*this, targetDocument, userProfile, body, eventType, userProfile->getDefaultPublicationTime()));
+   creator->getLastRequest()->header(h_CallID).value() = dialogSetId.getCallId();
+   creator->getLastRequest()->header(h_From).param(p_tag) = dialogSetId.getLocalTag();
+   return makeNewSession(creator, appDs);
+}
+
+std::shared_ptr<SipMessage>
+DialogUsageManager::makePublication(const NameAddr& targetDocument,
+                                    const DialogSetId& dialogSetId,
+                                    const std::shared_ptr<UserProfile>& userProfile,
+                                    const Contents& body,
+                                    const Data& eventType,
+                                    uint32_t expiresSeconds,
+                                    AppDialogSet* appDs) {
+   resip_assert(mDialogSetMap.find(dialogSetId) == mDialogSetMap.end());
+   BaseCreator* creator(new PublicationCreator(*this, targetDocument, userProfile, body, eventType, expiresSeconds));
    creator->getLastRequest()->header(h_CallID).value() = dialogSetId.getCallId();
    creator->getLastRequest()->header(h_From).param(p_tag) = dialogSetId.getLocalTag();
    return makeNewSession(creator, appDs);
