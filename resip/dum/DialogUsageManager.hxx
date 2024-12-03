@@ -219,6 +219,7 @@ class DialogUsageManager : public HandleManager, public TransactionUser
                                                        const Contents* initialOffer, EncryptionLevel level = None, const Contents* alternative = nullptr, AppDialogSet* = nullptr);
 
       std::shared_ptr<SipMessage> makeSubscription(const NameAddr& target, const std::shared_ptr<UserProfile>& userProfile, const Data& eventType, AppDialogSet* = nullptr);
+      std::shared_ptr<SipMessage> makeSubscription(const NameAddr& target, const DialogSetId& dialogSetId, const std::shared_ptr<UserProfile>& userProfile, const Data& eventType, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeSubscription(const NameAddr& target, const std::shared_ptr<UserProfile>& userProfile, const Data& eventType,
                                              uint32_t subscriptionTime, AppDialogSet* = nullptr);
       std::shared_ptr<SipMessage> makeSubscription(const NameAddr& target, const std::shared_ptr<UserProfile>& userProfile, const Data& eventType,

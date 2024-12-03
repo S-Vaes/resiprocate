@@ -783,6 +783,16 @@ DialogUsageManager::makeSubscription(const NameAddr& target, const std::shared_p
 }
 
 std::shared_ptr<SipMessage>
+DialogUsageManager::makeSubscription(const NameAddr& target, const DialogSetId& dialogSetId, const std::shared_ptr<UserProfile>& userProfile, const Data& eventType, AppDialogSet* appDs)
+{
+    resip_assert(userProfile.get());
+    BaseCreator* creator(new SubscriptionCreator(*this, target, userProfile, eventType, userProfile->getDefaultRegistrationTime()));
+    creator->getLastRequest()->header(h_CallID).value() = dialogSetId.getCallId();
+    creator->getLastRequest()->header(h_From).param(p_tag) = dialogSetId.getLocalTag();
+    return makeNewSession(creator, appDs);
+}
+
+std::shared_ptr<SipMessage>
 DialogUsageManager::makeSubscription(const NameAddr& target, const std::shared_ptr<UserProfile>& userProfile, const Data& eventType,
                                      uint32_t subscriptionTime, AppDialogSet* appDs)
 {
