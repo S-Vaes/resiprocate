@@ -70,6 +70,9 @@ ClientPublication::end(bool immediate)
       InfoLog(<< "End client publication to " << mPublish->header(h_RequestLine).uri());
       mPublish->header(h_Expires).value() = 0;
       mPublish->releaseContents();
+      if(mResendDocumentOnRefresh) {
+         mPublish->setContents(mDocument);
+      }
       send(mPublish);
    }
    else
