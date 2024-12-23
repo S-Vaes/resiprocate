@@ -824,9 +824,9 @@ DialogUsageManager::makeRegistration(const NameAddr& target, const std::shared_p
 }
 
 std::shared_ptr<SipMessage>
-DialogUsageManager::makeRegistration(const NameAddr& target, const DialogSetId& dialogSetId, const std::shared_ptr<UserProfile>& userProfile, AppDialogSet* ads = nullptr) {
+DialogUsageManager::makeRegistration(const NameAddr& target, const DialogSetId& dialogSetId, const std::shared_ptr<UserProfile>& userProfile, AppDialogSet* appDs) {
     resip_assert(mDialogSetMap.find(dialogSetId) == mDialogSetMap.end());
-    BaseCreator* baseCreator(new RegistrationCreator(*this, target, userProfile, userProfile->getDefaultRegistrationTime()), appDs);
+    BaseCreator* baseCreator(new RegistrationCreator(*this, target, userProfile, userProfile->getDefaultRegistrationTime()));
     baseCreator->getLastRequest()->header(h_CallID).value() = dialogSetId.getCallId();
     baseCreator->getLastRequest()->header(h_From).param(p_tag) = dialogSetId.getLocalTag();
     return makeNewSession(baseCreator, appDs);
