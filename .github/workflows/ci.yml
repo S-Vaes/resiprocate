@@ -1,6 +1,10 @@
 name: CI
 on: [push, pull_request]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Build with ${{ matrix.c-compiler }}
@@ -50,7 +54,6 @@ jobs:
             libgeoip-dev \
             libgloox-dev \
             libgstreamermm-1.0-dev \
-            libpcre3-dev \
             libpopt-dev \
             libpq-dev \
             postgresql-server-dev-all \
@@ -64,6 +67,7 @@ jobs:
             libtelepathy-qt5-dev \
             libwebsocketpp-dev \
             libxerces-c-dev \
+            libnetxx-dev \
             lld-13 \
             make \
             perl \

@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.6 FATAL_ERROR)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake_modules")
 
+# For Visual Studio Solution Generation
+ set(CMAKE_MAP_IMPORTED_CONFIG_RELEASE Release)
+ set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL Release)
+ set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release)
+
 if(POLICY CMP0042)
    CMAKE_POLICY(SET CMP0042 NEW)
 endif(POLICY CMP0042)
@@ -88,7 +93,6 @@ endif()
 # Top-level user-settable variables (with defaults)
 # Those can be queried from the command line using "cmake -LH" and can be
 # specified on the command line, using cmake-gui or ccmake.
-option(WITH_C_ARES "Link against libc-ares (rather than rutil/dns/ares)" FALSE)
 option(WITH_SSL "Link against SSL libraries" TRUE)
 option(USE_POPT "Link against POPT libraries" TRUE)
 option(USE_SIGCOMP "Use OpenSigComp" FALSE)
@@ -106,17 +110,18 @@ option(USE_SOCI_POSTGRESQL "Build recon with SOCI PostgreSQL support" FALSE)
 # time in some environments, e.g. CentOS 8.1
 option(USE_SOCI_MYSQL "Build recon with SOCI MySQL support" FALSE)
 option(USE_POSTGRESQL "Link against PostgreSQL client libraries" FALSE)
-option(USE_MAXMIND_GEOIP "Link against MaxMind GeoIP libraries" FALSE)
+option(USE_MAXMIND_GEOIP "Link against MaxMind GeoIP libraries" TRUE)
 option(RESIP_HAVE_RADCLI "Link against radcli RADIUS client library" FALSE)
 option(USE_NETSNMP "Link against NetSNMP client libraries" FALSE)
 option(BUILD_REPRO "Build repro SIP proxy" TRUE)
 option(BUILD_RETURN "Build reTurn server" TRUE)
+option(BUILD_REFLOW "Build reflow library" TRUE)
 option(BUILD_REND "Build rend" TRUE)
-option(BUILD_TFM "Build TFM, requires Netxx and cppunit" FALSE)
+option(BUILD_TFM "Build TFM, requires Netxx and cppunit" TRUE)
 option(BUILD_CLICKTOCALL "Build Click to call application" FALSE)
 option(BUILD_ICHAT_GW "Build iChat gateway, requires gloox" FALSE)
 option(BUILD_TELEPATHY_CM "Build Telepathy connection manager" FALSE)
-option(BUILD_RECON "Build reCon Conversation Manager library" FALSE)
+option(BUILD_RECON "Build reCon Conversation Manager library" TRUE)
 option(USE_SRTP1 "Use srtp 1.x instead of current version" FALSE)
 option(BUILD_RECONSERVER "Build reConServer" FALSE)
 option(USE_SIPXTAPI "Link against sipXtapi" FALSE)
@@ -130,22 +135,31 @@ option(BUILD_TESTING "Build manual & unit tests" TRUE)
 
 # Enable/disable linux based settings appropriately
 if(WIN32)
+   set(WITH_C_ARES_DEFAULT OFF)
    set(BUILD_QPID_PROTON_DEFAULT OFF)
    set(RESIP_ASSERT_SYSLOG_DEFAULT OFF)
    set(REGENERATE_MEDIA_SAMPLES_DEFAULT OFF)
    set(BUILD_DSO_PLUGINS_DEFAULT OFF)
 else()
+   set(WITH_C_ARES_DEFAULT ON)  # Needed for TFM to build correctly on linux
    set(BUILD_QPID_PROTON_DEFAULT ON)
    set(RESIP_ASSERT_SYSLOG_DEFAULT ON)
    set(REGENERATE_MEDIA_SAMPLES_DEFAULT ON)
    set(BUILD_DSO_PLUGINS_DEFAULT ON)
 endif()
+option(WITH_C_ARES "Link against libc-ares (rather than rutil/dns/ares)" ${WITH_C_ARES_DEFAULT})
 option(BUILD_QPID_PROTON "Build components requiring qpid-proton (AMQP)" ${BUILD_QPID_PROTON_DEFAULT})
 option(RESIP_ASSERT_SYSLOG "Log assertion failures with Syslog" ${RESIP_ASSERT_SYSLOG_DEFAULT})
 option(REGENERATE_MEDIA_SAMPLES "Regenerate the header files containing raw audio samples (requires sox, xxd)" ${REGENERATE_MEDIA_SAMPLES_DEFAULT})
 option(BUILD_DSO_PLUGINS "Build DSO plugins" ${BUILD_DSO_PLUGINS_DEFAULT})
 
-set(DEFAULT_BRIDGE_MAX_IN_OUTPUTS 20 CACHE STRING "recon: Maximum connections on bridge")
+if(WIN32)
+    # Windows vcxproj files specify 10 in sipXtapi
+    set(DEFAULT_BRIDGE_MAX_IN_OUTPUTS 10 CACHE STRING "recon: Maximum connections on bridge (must match value sipXtapi was compiled with)")
+else()
+    # Pre-build linux packages uses 20
+    set(DEFAULT_BRIDGE_MAX_IN_OUTPUTS 20 CACHE STRING "recon: Maximum connections on bridge (must match value sipXtapi was compiled with)")
+endif()
 
 # This must be enabled when building with the Android ndkports tools.
 # It should not be enabled for any other case.
@@ -239,17 +253,26 @@ endif()
 ### Per-program dependencies ###
 ################################
 
-set(USE_PCRE FALSE)
 set(USE_WEBSOCKETPP FALSE)
 
 if(BUILD_REPRO)
    set(USE_BDB TRUE)
-   set(USE_PCRE TRUE)
    set(USE_CAJUN TRUE)
 endif()
 
 if(BUILD_RECON)
    set(USE_SRTP TRUE)
+   set(BUILD_RELOW TRUE)
+   set(BUILD_RETURN TRUE)
+endif()
+
+if(BUILD_REFLOW)
+   set(USE_SRTP TRUE)
+   set(BUILD_RETURN TRUE)
+endif()
+
+if(BUILD_RETURN)
+   set(USE_ASIO TRUE)
 endif()
 
 if(BUILD_TFM)
@@ -257,9 +280,8 @@ if(BUILD_TFM)
    set(USE_CPPUNIT TRUE)
 endif()
 
-if(BUILD_RETURN)
-   set(USE_ASIO TRUE)
-   #set(USE_BOOST TRUE)  # Dependency has been replaced by C++11
+if(BUILD_REND)
+   set(USE_BOOST TRUE)
 endif()
 
 if(USE_KURENTO)
@@ -267,9 +289,6 @@ if(USE_KURENTO)
    set(USE_WEBSOCKETPP TRUE)
 endif()
 
-if(BUILD_CLICKTOCALL)
-   set(USE_PCRE TRUE)
-endif()
 
 ####################
 ### Dependencies ###
@@ -319,9 +338,10 @@ function(nuget_inst)
    set(${ARGV0}_TARGETS ${CMAKE_BINARY_DIR}/packages/${ARGV1}/build/native/${ARGV1}.targets PARENT_SCOPE)
 
    set(PKG_TOP "${CMAKE_BINARY_DIR}/packages/${ARGV1}/build/native")
-   set(PKG_LIB "${PKG_TOP}/lib/${WIN_ARCH}/${CMAKE_BUILD_TYPE}")
+   set(PKG_LIB "${PKG_TOP}/lib/${WIN_ARCH}/Release")  # TODO - fix this
 
    set(${ARGV0}_ROOT_DIR "${PKG_TOP}" PARENT_SCOPE)
+   set(${ARGV0}_PKG_DIR "${CMAKE_BINARY_DIR}/packages/${ARGV1}" PARENT_SCOPE)
 
    # These vary a lot from one package to the next.  We
    # set them to some common default values but in many
@@ -334,18 +354,44 @@ endfunction()
 # OpenSSL
 if(WITH_SSL)
    if(USE_NUGET)
-      nuget_inst(OPENSSL "zeroc.openssl.v142" "1.1.1.2")
+      nuget_inst(OPENSSL "zeroc.openssl.v142" "1.1.1.3")  # VS2019 compatible version, also compatible with VS2022
       message("Using ${OPENSSL_ROOT_DIR} and ${OPENSSL_LIBRARIES_DIR}")
       # this is an argument to FindOpenSSL
       # https://cmake.org/cmake/help/latest/module/FindOpenSSL.html
       set(OPENSSL_USE_STATIC_LIBS True)
-#      set(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_LIBRARIES}/libcrypto.lib")
       set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
-      set(OPENSSL_LIBRARIES
-            "${OPENSSL_LIBRARIES_DIR}/libssl.lib"
-            "${OPENSSL_LIBRARIES_DIR}/libcrypto.lib")
       set(OPENSSL_FOUND TRUE)
-      install(DIRECTORY ${OPENSSL_ROOT_DIR}/bin/${WIN_ARCH}/${CMAKE_BUILD_TYPE}/ DESTINATION ${CMAKE_INSTALL_SBINDIR})
+
+      # CMakes Visual Studio generation can't properly handle having multiple lib files listed in a single 
+      # IMPORTED_IMPLIB property like the following:
+      #set_property(TARGET OPENSSL PROPERTY IMPORTED_IMPLIB_RELEASE 
+      #  "${OPENSSL_ROOT_DIR}/lib/${WIN_ARCH}/Release/libssl.lib"
+      #  "${OPENSSL_ROOT_DIR}/lib/${WIN_ARCH}/Release/libcrypto.lib")
+      #set_property(TARGET OPENSSL PROPERTY IMPORTED_IMPLIB_DEBUG 
+      #  "${OPENSSL_ROOT_DIR}/lib/${WIN_ARCH}/Debug/libssl.lib"
+      #  "${OPENSSL_ROOT_DIR}/lib/${WIN_ARCH}/Debug/libcrypto.lib")
+      # To around this we must break the OpenSSL library into 2 add_library calls 
+      # (named OPENSSL and OPENSSL_CRYPTO) in order for the library linking to work.
+      add_library(OPENSSL SHARED IMPORTED GLOBAL)
+      add_library(OPENSSL_CRYPTO SHARED IMPORTED GLOBAL)
+      set_property(TARGET OPENSSL PROPERTY IMPORTED_IMPLIB_RELEASE "${OPENSSL_ROOT_DIR}/lib/${WIN_ARCH}/Release/libssl.lib")
+      set_property(TARGET OPENSSL_CRYPTO PROPERTY IMPORTED_IMPLIB_RELEASE "${OPENSSL_ROOT_DIR}/lib/${WIN_ARCH}/Release/libcrypto.lib")
+      set_property(TARGET OPENSSL PROPERTY IMPORTED_IMPLIB_DEBUG "${OPENSSL_ROOT_DIR}/lib/${WIN_ARCH}/Debug/libssl.lib")
+      set_property(TARGET OPENSSL_CRYPTO PROPERTY IMPORTED_IMPLIB_DEBUG "${OPENSSL_ROOT_DIR}/lib/${WIN_ARCH}/Debug/libcrypto.lib")
+
+      # These are used to add Custom PostBuild copy steps to executables that need these dll's to run
+      set_property(TARGET OPENSSL PROPERTY IMPORTED_LOCATION_RELEASE 
+        "${OPENSSL_ROOT_DIR}/bin/${WIN_ARCH}/Release/libssl-1_1-${WIN_ARCH}.dll"
+        "${OPENSSL_ROOT_DIR}/bin/${WIN_ARCH}/Release/libcrypto-1_1-${WIN_ARCH}.dll"
+      )
+      set_property(TARGET OPENSSL PROPERTY IMPORTED_LOCATION_DEBUG 
+        "${OPENSSL_ROOT_DIR}/bin/${WIN_ARCH}/Debug/libssl-1_1-${WIN_ARCH}.dll"
+        "${OPENSSL_ROOT_DIR}/bin/${WIN_ARCH}/Debug/libcrypto-1_1-${WIN_ARCH}.dll"
+      )
+
+      install(DIRECTORY ${OPENSSL_ROOT_DIR}/bin/${WIN_ARCH}/Release/ DESTINATION ${CMAKE_INSTALL_SBINDIR})
+      install(DIRECTORY ${OPENSSL_ROOT_DIR}/bin/${WIN_ARCH}/Release/ DESTINATION ${CMAKE_INSTALL_BINDIR})
+      install(DIRECTORY ${OPENSSL_ROOT_DIR}/bin/${WIN_ARCH}/Release/ DESTINATION tfm)
    elseif(USE_NDKPORTS_HACKS)
       if(NOT ANDROID_ABI)
          message(FATAL_ERROR "ndkports hack requested but ANDROID_ABI not set")
@@ -425,7 +471,7 @@ if(USE_MYSQL)
       #add_subdirectory(contrib/MySQLConnectorC)
       set(MySQL_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/contrib/MySQLConnectorC")
       set(MySQL_INCLUDE_DIRS "${MySQL_ROOT}/include")
-      set(MySQL_LIBRARIES "${MySQL_ROOT}/lib/${CMAKE_BUILD_TYPE}/libmysql.lib")
+      set(MySQL_LIBRARIES "${MySQL_ROOT}/lib/Release/libmysql.lib") # TODO Fix this
       set(MySQL_FOUND TRUE)
    else()
       find_package(MySQL REQUIRED)
@@ -459,8 +505,10 @@ endif()
 if(USE_MAXMIND_GEOIP)
    if(USE_CONTRIB)
       # FIXME - update reSIProcate for libmaxminddb - successor to GeoIP
-      message(FATAL_ERROR "GeoIP has been deprecated upstream, see https://github.com/maxmind/geoip-api-c")
-      #add_subdirectory(contrib/GeoIP)
+      # message(FATAL_ERROR "GeoIP has been deprecated upstream, see https://github.com/maxmind/geoip-api-c")
+      add_subdirectory(contrib/GeoIP)
+      set(GEOIP_LIBRARIES libGeoIP)
+      set(GEOIP_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/contrib/GeoIP/libGeoIP")
    else()
       find_package(GeoIP REQUIRED)
    endif()
@@ -519,7 +567,7 @@ option_def(BUILD_ICHAT_GW)
 if(USE_NETXX)
    if(USE_CONTRIB)
       add_subdirectory(contrib/Netxx-0.3.2)
-      set(Netxx_LIBRARIES Netxx)
+      set(NETXX_LIBRARIES Netxx)
    else()
       find_package(Netxx REQUIRED)
    endif()
@@ -529,7 +577,7 @@ endif()
 # Debian: libcppunit-dev
 if(USE_CPPUNIT)
    if(USE_CONTRIB)
-      add_subdirectory(contrib/cppunit)
+      add_subdirectory(contrib/cppunit/src/cppunit)
       set(CPPUNIT_LIBRARIES cppunit)
    else()
       pkg_check_modules(CPPUNIT cppunit REQUIRED)
@@ -540,17 +588,19 @@ endif()
 # Debian: libdb++-dev
 if(USE_BDB)
    if(USE_NUGET)
-      #nuget_inst(BERKELEYDB "BerkeleyDB-4_8_30-Cpp" "4.8.30.2")
-      #set(BERKELEYDB_LIBRARIES_DIR "${BERKELEYDB_ROOT_DIR}/bin")
-      #set(BERKELEYDB_LIBRARIES
-      #      "${BERKELEYDB_LIBRARIES_DIR}/lib/${WIN_ARCH}/Debug/libdb48d.lib")
       # https://www.nuget.org/packages/berkeley.db.v140
       nuget_inst(BERKELEYDB "berkeley.db.v140" "5.3.28.3")
-      set(BERKELEYDB_LIBRARIES_DIR "${BERKELEYDB_ROOT_DIR}/lib/${WIN_ARCH}/${CMAKE_BUILD_TYPE}")
-      set(BERKELEYDB_LIBRARIES
-            "${BERKELEYDB_LIBRARIES_DIR}/libdb53d.lib")
+
+      add_library(BERKELEYDB SHARED IMPORTED GLOBAL)
+      set_property(TARGET BERKELEYDB PROPERTY IMPORTED_IMPLIB_RELEASE "${BERKELEYDB_ROOT_DIR}/lib/${WIN_ARCH}/Release/libdb53.lib")
+      set_property(TARGET BERKELEYDB PROPERTY IMPORTED_IMPLIB_DEBUG "${BERKELEYDB_ROOT_DIR}/lib/${WIN_ARCH}/Debug/libdb53d.lib")
+      # These are used to add Custom PostBuild copy steps to executables that need these dll's to run
+      set_property(TARGET BERKELEYDB PROPERTY IMPORTED_LOCATION_RELEASE "${BERKELEYDB_ROOT_DIR}/bin/${WIN_ARCH}/Release/libdb53.dll")
+      set_property(TARGET BERKELEYDB PROPERTY IMPORTED_LOCATION_DEBUG "${BERKELEYDB_ROOT_DIR}/bin/${WIN_ARCH}/Debug/libdb53d.dll")
+
       set(BERKELEYDB_FOUND TRUE)
-      install(DIRECTORY ${BERKELEYDB_ROOT_DIR}/bin/${WIN_ARCH}/${CMAKE_BUILD_TYPE}/ DESTINATION ${CMAKE_INSTALL_SBINDIR})
+      install(DIRECTORY ${BERKELEYDB_ROOT_DIR}/bin/${WIN_ARCH}/Relese/ DESTINATION ${CMAKE_INSTALL_SBINDIR})
+      install(DIRECTORY ${BERKELEYDB_ROOT_DIR}/bin/${WIN_ARCH}/Release/ DESTINATION tfm)
    elseif(USE_CONTRIB)
       add_subdirectory(contrib/db)
    else()
@@ -559,45 +609,17 @@ if(USE_BDB)
    set(DB_HEADER "db_cxx.h")
 endif()
 
-# PCRE
-# Debian: libpcre3-dev
-# FIXME - deprecate PCRE in favour of C++11 <regex>
-if(USE_PCRE)
-   if(USE_NUGET)
-      nuget_inst(PCRE "pcre" "8.33.0.1")
-      if(BUILD_SHARED_LIBS)
-         set(WIN_LIB_LINKING "dynamic")
-      else()
-         set(WIN_LIB_LINKING "static")
-         add_definitions(-DPCRE_STATIC)
-      endif()
-      set(PCRE_LIBRARIES_DIR "${PCRE_ROOT_DIR}/lib/v110/${WIN_ARCH}/${CMAKE_BUILD_TYPE}/${WIN_LIB_LINKING}/utf8")
-      set(PCRE_LIBRARIES
-              "${PCRE_LIBRARIES_DIR}/pcre8.lib")
-      # FIXME - check if those libraries and headers really exist
-      if(NOT EXISTS "${PCRE_LIBRARIES}")
-         message(FATAL_ERROR "could not find ${PCRE_LIBRARIES}")
-      endif()
-      set(PCRE_FOUND TRUE)
-   elseif(USE_CONTRIB)
-      add_subdirectory(contrib/pcre)
-      set(PCRE_LIBRARIES pcre)
-   else()
-      pkg_check_modules(PCRE REQUIRED libpcre)
-   endif()
-endif()
-
 # Cajun
 # Debian: libcajun-dev
 if(USE_CAJUN)
-   if(USE_CONTRIB)
+   #if(USE_CONTRIB)
       # FIXME: convert Cajun to CMake build system
       # FIXME: include Cajun as a Git submodule or NuGet
       #add_subdirectory(contrib/cajun)
       set(CAJUN_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/contrib/cajun/include")
-   else()
-      find_package(cajun REQUIRED)
-   endif()
+   #else()
+   #   find_package(cajun REQUIRED)
+   #endif()
 endif()
 
 # ASIO
@@ -617,10 +639,9 @@ endif()
 if(USE_BOOST)
    if(USE_NUGET)
       nuget_inst(BOOST "boost" "1.80.0")
-      message("Using ${BOOST_ROOT_DIR} and ${BOOST_LIBRARIES}")
-      set(BOOST_LIBRARIES
-            "${BOOST_LIBRARIES_DIR}/libboostcore.lib")
-      # FIXME - check if those libraries and headers really exist
+      message("Using ${BOOST_PKG_DIR}")
+      #set(BOOST_LIBRARIES "${BOOST_LIBRARIES_DIR}/libboostcore.lib")
+      set(BOOST_INCLUDE_DIRS "${BOOST_PKG_DIR}/lib/native/include")
       set(BOOST_FOUND TRUE)
    else()
       find_package(Boost REQUIRED)
@@ -648,14 +669,13 @@ if(USE_SRTP)
    if(USE_SRTP1)
       find_package(srtp REQUIRED)
    else()
-      # FIXME - not in NuGet, not CMake native
       if(USE_CONTRIB)
          add_subdirectory("contrib/srtp")
-         #set(libsrtp2_INCLUDE_DIRS "${libsrtp2_INCLUDE_DIRS}")
-         #set(libsrtp2_LIBRARIES "${libsrtp2_LIBRARIES}")
-         # FIXME - these shouldn't be hard-coded, need to fix the above variables
+
          set(SRTP2_INCLUDE_DIRS "${libsrtp2_SOURCE_DIR}/include")
-         set(SRTP2_LIBRARIES "${libsrtp2_BINARY_DIR}/contrib/srtp/${CMAKE_BUILD_TYPE}/srtp2.lib")
+         set_property(TARGET srtp2 PROPERTY IMPORTED_IMPLIB_RELEASE "${libsrtp2_BINARY_DIR}/Release/srtp2.lib")
+         set_property(TARGET srtp2 PROPERTY IMPORTED_IMPLIB_DEBUG "${libsrtp2_BINARY_DIR}/Debug/srtp2.lib")
+
          set(SRTP_FOUND TRUE)
       else()
          find_package(srtp2 REQUIRED)
@@ -667,8 +687,88 @@ endif()
 # Debian: libsipxtapi-dev
 if(USE_SIPXTAPI)
    option_def(USE_SIPXTAPI)
-   find_package(sipXtapi REQUIRED)
-   if(NOT WIN32)
+   if(WIN32)
+      # Include VS2022 projects for sipXtapi - TODO Detect VS version and use other versions appropriately
+      # Note:  this requires the user the manually pull sipXtapi source code into a folder that is called sipXtapi and
+      #        is at the same folder level at the resiprocate git repro, ie:
+      #        <basedir>/resiprocate/<resip-git-root>
+      #        <basedir>/sipXtapi/<sipXtapi-git-root>
+      set(SIPXTAPI_ROOT_DIR "${CMAKE_SOURCE_DIR}/../sipXtapi")
+      message("Using SIPXTAPI_ROOT_DIR=${SIPXTAPI_ROOT_DIR}")
+      include_external_msproject(sipXtapi-pcre ${SIPXTAPI_ROOT_DIR}/sipXportLib/contrib/pcre/pcre_17_0.vcxproj)
+      include_external_msproject(sipXportLib ${SIPXTAPI_ROOT_DIR}/sipXportLib/sipXportLib-msvc17.vcxproj)
+      include_external_msproject(sipXsdpLib ${SIPXTAPI_ROOT_DIR}/sipXsdpLib/sipXsdpLib-msvc17.vcxproj)
+      include_external_msproject(sipXmediaLib ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/sipXmediaLib-msvc17.vcxproj)
+      include_external_msproject(sipXmediaAdapterLib ${SIPXTAPI_ROOT_DIR}/sipXmediaAdapterLib/sipXmediaAdapterLib-msvc17.vcxproj)
+
+      # Setup VS folders
+      set_target_properties(sipXtapi-pcre PROPERTIES FOLDER sipXtapi)
+      set_target_properties(sipXportLib PROPERTIES FOLDER sipXtapi)
+      set_target_properties(sipXsdpLib PROPERTIES FOLDER sipXtapi)
+      set_target_properties(sipXmediaLib PROPERTIES FOLDER sipXtapi)
+      set_target_properties(sipXmediaAdapterLib PROPERTIES FOLDER sipXtapi)
+
+      # Setup Includes
+      set(SIPXTAPI_INCLUDE_DIRS 
+          "${SIPXTAPI_ROOT_DIR}/sipXportLib/include"
+          "${SIPXTAPI_ROOT_DIR}/sipXsdpLib/include"
+          "${SIPXTAPI_ROOT_DIR}/sipXmediaLib/include"
+          "${SIPXTAPI_ROOT_DIR}/sipXtackLib/include"
+          "${SIPXTAPI_ROOT_DIR}/sipXcallLib/include"
+          "${SIPXTAPI_ROOT_DIR}/sipXmediaAdapterLib/interface"
+          "${SIPXTAPI_ROOT_DIR}/sipXmediaAdapterLib/sipXmediaMediaProcessing/include"
+      )
+
+      # No need to setup libraries, executables will use add_dependencies to get VS linker to link in appropriate libs
+
+      # Codec contrib projects
+      include_external_msproject(libg729a ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/contrib/libg729a/libg729a-msvc17.vcxproj)
+      include_external_msproject(libgsm ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/contrib/libgsm/libgsm-msvc17.vcxproj)
+      include_external_msproject(libilbc ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/contrib/libilbc/VS2022/libilbc-msvc17.vcxproj)
+      include_external_msproject(libogg ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/contrib/libopus/libogg/win32/VS2022/libogg.vcxproj)
+      include_external_msproject(libspeex ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/contrib/libspeex/win32/VS2022/libspeex/libspeex.vcxproj)
+      include_external_msproject(libspeexdsp ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/contrib/libspeex/win32/VS2022/libspeexdsp/libspeexdsp.vcxproj)
+      include_external_msproject(opus ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/contrib/libopus/opus/win32/VS2022/opus.vcxproj)
+      include_external_msproject(opusenc ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/contrib/libopus/libopusenc/win32/VS2022/opusenc.vcxproj)
+      include_external_msproject(opusfile ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/contrib/libopus/opusfile/win32/VS2022/opusfile.vcxproj)
+      # Make sure we pickup the NoHTTP versions of these projects
+      set_property(TARGET opusfile PROPERTY MAP_IMPORTED_CONFIG_RELEASE "Release-NoHTTP")
+      set_property(TARGET opusfile PROPERTY MAP_IMPORTED_CONFIG_DEBUG "Debug-NoHTTP")
+
+      # Setup VS folders
+      set_target_properties(libg729a PROPERTIES FOLDER sipXtapi/ThirdPartyCodecs)
+      set_target_properties(libgsm PROPERTIES FOLDER sipXtapi/ThirdPartyCodecs)
+      set_target_properties(libilbc PROPERTIES FOLDER sipXtapi/ThirdPartyCodecs)
+      set_target_properties(libogg PROPERTIES FOLDER sipXtapi/ThirdPartyCodecs)
+      set_target_properties(libspeex PROPERTIES FOLDER sipXtapi/ThirdPartyCodecs)
+      set_target_properties(libspeexdsp PROPERTIES FOLDER sipXtapi/ThirdPartyCodecs)
+      set_target_properties(opus PROPERTIES FOLDER sipXtapi/ThirdPartyCodecs)
+      set_target_properties(opusenc PROPERTIES FOLDER sipXtapi/ThirdPartyCodecs)
+      set_target_properties(opusfile PROPERTIES FOLDER sipXtapi/ThirdPartyCodecs)
+
+
+      # Codec plugin projects
+      include_external_msproject(plgg729 ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/src/mp/codecs/plgg729/plgg729-msvc17.vcxproj)
+      include_external_msproject(plggsm ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/src/mp/codecs/plggsm/plggsm-msvc17.vcxproj)
+      include_external_msproject(plgilbc ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/src/mp/codecs/plgilbc/plgilbc-msvc17.vcxproj)
+      include_external_msproject(plgl16 ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/src/mp/codecs/plgl16/plgl16-msvc17.vcxproj)
+      include_external_msproject(plgopus ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/src/mp/codecs/plgopus/plgopus-msvc17.vcxproj)
+      include_external_msproject(plgpcmapcmu ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/src/mp/codecs/plgpcmapcmu/plgpcmapcmu-msvc17.vcxproj)
+      include_external_msproject(plgspeex ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/src/mp/codecs/plgspeex/plgspeex-msvc17.vcxproj)
+      include_external_msproject(plgtones ${SIPXTAPI_ROOT_DIR}/sipXmediaLib/src/mp/codecs/plgtones/plgtones-msvc17.vcxproj)
+
+      # Setup VS folders
+      set_target_properties(plgg729 PROPERTIES FOLDER sipXtapi/CodecPlugins)
+      set_target_properties(plggsm PROPERTIES FOLDER sipXtapi/CodecPlugins)
+      set_target_properties(plgilbc PROPERTIES FOLDER sipXtapi/CodecPlugins)
+      set_target_properties(plgl16 PROPERTIES FOLDER sipXtapi/CodecPlugins)
+      set_target_properties(plgopus PROPERTIES FOLDER sipXtapi/CodecPlugins)
+      set_target_properties(plgpcmapcmu PROPERTIES FOLDER sipXtapi/CodecPlugins)
+      set_target_properties(plgspeex PROPERTIES FOLDER sipXtapi/CodecPlugins)
+      set_target_properties(plgtones PROPERTIES FOLDER sipXtapi/CodecPlugins)
+
+   else()
+      find_package(sipXtapi REQUIRED)
       set(SIPX_NO_RECORD true)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__pingtel_on_posix__")
    endif()
@@ -775,6 +875,7 @@ set(GPERF_SIZE_TYPE "size_t")
 
 if(WIN32)
    add_definitions(-DNOMINMAX)
+   add_compile_definitions(_WIN32_WINNT=0x0601)
 endif()
 
 ##############################
@@ -808,7 +909,7 @@ if(BUILD_RETURN)
    add_subdirectory(reTurn)
 endif()
 
-if(BUILD_RECON)
+if(BUILD_REFLOW)
    add_subdirectory(reflow)
 endif()
 

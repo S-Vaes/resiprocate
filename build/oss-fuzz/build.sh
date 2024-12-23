@@ -22,11 +22,17 @@ cmake -S . -B _build \
     -DBUILD_CLICKTOCALL=OFF \
     -DBUILD_QPID_PROTON=OFF \
     -DBUILD_RECON=OFF \
+    -DBUILD_REFLOW=OFF \
+    -DBUILD_REND=OFF \
     -DBUILD_REPRO=OFF \
     -DBUILD_RETURN=OFF \
     -DBUILD_TFM=OFF \
     -DREGENERATE_MEDIA_SAMPLES=OFF \
     -DUSE_DTLS=OFF \
+    -DUSE_KURENTO=OFF \
+    -DUSE_MAXMIND_GEOIP=OFF \
+    -DUSE_POPT=OFF \
+    -DWITH_C_ARES=OFF \
     -DWITH_SSL=OFF
 
 cmake --build _build --target fuzzUtil fuzzStack aresfuzz aresfuzzname

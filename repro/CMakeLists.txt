@@ -1,14 +1,48 @@
-add_executable(repro-bin
+add_executable(repro
    repro.cxx
+   HttpBase.cxx
+   HttpConnection.cxx
+   ReproRunner.cxx
+   ReproVersion.cxx
+   WebAdmin.cxx
+   WebAdminThread.cxx
    )
 
-target_link_libraries(repro-bin PUBLIC repro)
+set_target_properties(repro PROPERTIES FOLDER repro)
+target_link_libraries(repro PUBLIC reprolib)
 
-set_target_properties(repro-bin PROPERTIES OUTPUT_NAME repro)
+set(CONFIG_FILES
+   ${CMAKE_SOURCE_DIR}/repro/users.txt
+   ${CMAKE_SOURCE_DIR}/repro/repro.config 
+)
 
-install(TARGETS repro-bin DESTINATION ${CMAKE_INSTALL_SBINDIR})
-install(FILES repro.config DESTINATION ${CMAKE_INSTALL_SBINDIR})
-install(FILES doc/repro.8 doc/reprocmd.8 DESTINATION ${CMAKE_INSTALL_MANDIR}/man8)
+add_custom_command ( TARGET repro POST_BUILD
+   COMMAND ${CMAKE_COMMAND} -E copy_if_different
+   ${CONFIG_FILES} ${CMAKE_BINARY_DIR}/repro
+   COMMAND_EXPAND_LISTS
+)
+
+install(TARGETS repro DESTINATION ${CMAKE_INSTALL_SBINDIR})
+if(WIN32)
+  if(WITH_SSL)
+     add_custom_command ( TARGET repro POST_BUILD
+       COMMAND ${CMAKE_COMMAND} -E copy_if_different
+       $<TARGET_FILE:OPENSSL> $<TARGET_FILE_DIR:repro>
+       COMMAND_EXPAND_LISTS
+     )
+  endif()
+  if(USE_BDB)
+     add_custom_command ( TARGET repro POST_BUILD
+       COMMAND ${CMAKE_COMMAND} -E copy_if_different
+       $<TARGET_FILE:BERKELEYDB> $<TARGET_FILE_DIR:repro>
+       COMMAND_EXPAND_LISTS
+     )
+  endif()
+  # For windows only - move config and users.txt to install location, so repro can be run in place
+  install(FILES users.txt repro.config DESTINATION ${CMAKE_INSTALL_SBINDIR})
+else()
+  install(FILES doc/repro.8 doc/reprocmd.8 DESTINATION ${CMAKE_INSTALL_MANDIR}/man8)
+endif()
 
 set(INCLUDES
    AbstractDb.hxx
@@ -97,7 +131,8 @@ set(INCLUDES
    XmlRpcServerBase.hxx
 )
 
-add_library(repro
+add_library(reprolib
+   BerkeleyDb.cxx
    RouteStore.cxx
    UserStore.cxx
    ConfigStore.cxx
@@ -107,17 +142,11 @@ add_library(repro
    SiloStore.cxx
    Store.cxx
    AbstractDb.cxx
-   BerkeleyDb.cxx
    BasicWsConnectionValidator.cxx
 
    CommandServer.cxx
    CommandServerThread.cxx
    ProxyConfig.cxx
-   ReproVersion.cxx
-   HttpBase.cxx
-   HttpConnection.cxx
-   WebAdmin.cxx
-   WebAdminThread.cxx
 
    AccountingCollector.cxx
    Proxy.cxx
@@ -125,7 +154,6 @@ add_library(repro
    RegSyncClient.cxx
    RegSyncServer.cxx
    RegSyncServerThread.cxx
-   ReproRunner.cxx
    ReproAuthenticatorFactory.cxx
    ReproRADIUSServerAuthManager.cxx
    ReproServerAuthManager.cxx
@@ -133,9 +161,9 @@ add_library(repro
    RequestContext.cxx
    ResponseContext.cxx
    RRDecorator.cxx
+   SqlDb.cxx
    Processor.cxx
    ProcessorChain.cxx
-   SqlDb.cxx
    Target.cxx
    TlsPeerIdentityStore.cxx
    UserAuthGrabber.cxx
@@ -170,7 +198,7 @@ add_library(repro
    ${INCLUDES}
 )
 
-target_add_conditional_sources(repro OPENSSL_FOUND
+target_add_conditional_sources(reprolib OPENSSL_FOUND
    stateAgents/CertServer.cxx
    stateAgents/CertPublicationHandler.cxx
    stateAgents/CertSubscriptionHandler.cxx
@@ -178,48 +206,56 @@ target_add_conditional_sources(repro OPENSSL_FOUND
    stateAgents/PrivateKeySubscriptionHandler.cxx
 )
 
-target_add_conditional_sources(repro BUILD_DSO_PLUGINS
+target_add_conditional_sources(reprolib BUILD_DSO_PLUGINS
    Plugin.cxx
 )
 
-target_link_libraries(repro PUBLIC dum)
+target_link_libraries(reprolib PUBLIC dum)
 if(BUILD_DSO_PLUGINS)
-   target_link_libraries(repro PUBLIC ${CMAKE_DL_LIBS})
+   target_link_libraries(reprolib PUBLIC ${CMAKE_DL_LIBS})
 endif()
 
-target_include_directories(repro PUBLIC ${PROJECT_SOURCE_DIR})
-target_include_directories(repro PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_include_directories(repro PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(reprolib PUBLIC ${BERKELEYDB_INCLUDE_DIRS})
+if(USE_NUGET)
+  target_link_libraries(reprolib PUBLIC BERKELEYDB)
+else()
+  target_link_libraries(reprolib PUBLIC ${BERKELEYDB_LIBRARIES})
+endif()
 
-target_include_directories(repro PUBLIC ${CAJUN_INCLUDE_DIRS})
-target_include_directories(repro PUBLIC ${BERKELEYDB_INCLUDE_DIRS})
-target_include_directories(repro PUBLIC ${PCRE_INCLUDE_DIRS})
-target_link_libraries(repro PUBLIC ${BERKELEYDB_LIBRARIES})
-target_link_libraries(repro PUBLIC ${PCRE_LIBRARIES})
+target_include_directories(reprolib PUBLIC ${PROJECT_SOURCE_DIR})
+target_include_directories(reprolib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(reprolib PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+
+target_include_directories(reprolib PUBLIC ${CAJUN_INCLUDE_DIRS})
+target_include_directories(reprolib PUBLIC ${PCRE_INCLUDE_DIRS})
+target_link_libraries(reprolib PUBLIC ${PCRE_LIBRARIES})
 if(USE_MAXMIND_GEOIP)
-   target_link_libraries(repro PUBLIC ${GEOIP_LIBRARY})
+   target_include_directories(reprolib PUBLIC ${GEOIP_INCLUDE_DIRS})
+   target_link_libraries(reprolib PUBLIC ${GEOIP_LIBRARIES})
 endif()
 
-target_add_conditional_sources(repro MySQL_FOUND
+target_add_conditional_sources(reprolib MySQL_FOUND
    MySqlDb.cxx
    )
-target_link_libraries(repro PUBLIC ${MySQL_LIBRARIES})
-target_include_directories(repro PUBLIC ${MySQL_INCLUDE_DIRS})
+target_link_libraries(reprolib PUBLIC ${MySQL_LIBRARIES})
+target_include_directories(reprolib PUBLIC ${MySQL_INCLUDE_DIRS})
 
-target_add_conditional_sources(repro USE_POSTGRESQL
+target_add_conditional_sources(reprolib USE_POSTGRESQL
    PostgreSqlDb.cxx
    )
 
 if(USE_POSTGRESQL)
    # for some reason we can't use PostgreSQL_LIBRARIES here...
-   target_link_libraries(repro PUBLIC PostgreSQL::PostgreSQL)
+   target_link_libraries(reprolib PUBLIC PostgreSQL::PostgreSQL)
 endif()
 
-version_libname(repro)
+version_libname(reprolib)
 
 target_include_directories(repro PUBLIC ${PostgreSQL_INCLUDE_DIR})
 
-install(TARGETS repro DESTINATION ${CMAKE_INSTALL_LIBDIR})
+set_target_properties(reprolib PROPERTIES FOLDER repro)
+
+install(TARGETS reprolib DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install_and_preserve_hierarchy(${CMAKE_INSTALL_INCLUDEDIR}/repro ${INCLUDES})
 

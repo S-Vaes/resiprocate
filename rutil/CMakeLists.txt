@@ -225,6 +225,9 @@ target_add_conditional_sources(rutil WIN32
 
 # %HOME...%\source\repos\resiprocate\builds\packages\zeroc.openssl.v142\build\native\bin\x64\Debug
 
+# Enable MONOTONIC clock for rutil
+add_definitions(-D_RESIP_MONOTONIC_CLOCK)
+
 if(WIN32)
    target_link_libraries(rutil PUBLIC winmm)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -236,8 +239,12 @@ target_include_directories(rutil PRIVATE ${ARES_INCLUDE_DIRS})
 target_include_directories(rutil PUBLIC ${QPIDPROTON_INCLUDE_DIRS})
 target_include_directories(rutil PUBLIC ${Python3_INCLUDE_DIRS} ${PYCXX_INCLUDE_DIRS})
 target_include_directories(rutil PUBLIC ${OPENSSL_INCLUDE_DIR})
-#target_link_libraries(rutil ${OPENSSL_TARGETS})
-target_link_libraries(rutil PUBLIC ${OPENSSL_LIBRARIES})
+if(USE_NUGET)
+  target_link_libraries(rutil PUBLIC OPENSSL)
+  target_link_libraries(rutil PUBLIC OPENSSL_CRYPTO)
+else()
+  target_link_libraries(rutil PUBLIC ${OPENSSL_LIBRARIES})
+endif()
 target_link_libraries(rutil PRIVATE ${ARES_LIBRARIES})
 target_link_libraries(rutil PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(rutil PUBLIC ${QPIDPROTON_LIBRARIES})
