@@ -11,7 +11,7 @@ stdenv.mkDerivation rec {
   };
 
   patchFlags = [ "-p1" ];
-  patches = [ ./reader.patch ./makefile.patch ];
+  patches = [ ./reader.patch ./makefile.patch ./elements.patch ];
   nativeBuildInputs = [ patch dos2unix ];
 
   CXXFLAGS = "-std=c++11";
