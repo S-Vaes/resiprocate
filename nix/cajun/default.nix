@@ -11,7 +11,7 @@ stdenv.mkDerivation rec {
   };
 
   patchFlags = [ "-p1" ];
-  patches = [ ./reader.patch ./makefile.patch ];
+  patches = [ ./reader.patch ./makefile.patch ./elements.patch ];
   nativeBuildInputs = [ patch dos2unix ];
 
   CXXFLAGS = "-std=c++11";
@@ -23,6 +23,7 @@ stdenv.mkDerivation rec {
   prePatch = ''
     dos2unix Makefile
     dos2unix include/cajun/json/reader.inl
+    dos2unix include/cajun/json/elements.inl
   '';
 
   installPhase = ''

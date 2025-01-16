@@ -1,0 +1,19 @@
+diff -ur a/include/cajun/json/elements.inl b/include/cajun/json/elements.inl
+--- a/include/cajun/json/elements.inl
++++ b/include/cajun/json/elements.inl
+@@ -251,10 +251,13 @@
+           element == member.element;
+ }
+
+-class Object::Finder : public std::unary_function<Object::Member, bool>
++class Object::Finder
+ {
+ public:
++   typedef Object::Member argument_type;
++   typedef bool result_type;
++
+    Finder(const std::string& name) : m_name(name) {}
+-   bool operator () (const Object::Member& member) {
++   bool operator () (const Object::Member& member) const {
+       return member.name == m_name;
+    }
