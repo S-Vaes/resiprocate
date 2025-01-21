@@ -40,10 +40,6 @@
         # Native packages
         native = mkPkgsFor pkgs;
         default = native.resiprocate;
-
-        # Cross-compiled packages for Darwin
-        aarch64-darwin = mkPkgsFor crossPkgs.aarch64-darwin;
-        x86_64-darwin = mkPkgsFor crossPkgs.x86_64-darwin;
       };
 
       overlays.default = final: prev: {
