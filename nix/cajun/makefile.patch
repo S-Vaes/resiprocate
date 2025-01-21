@@ -1,22 +1,22 @@
 diff -ur a/Makefile b/Makefile
 --- a/Makefile
 +++ b/Makefile
-@@ -1,7 +1,7 @@
+@@ -1,6 +1,6 @@
  EXE_NAME = ./example.out
- 
+
  $(EXE_NAME): example.cpp
 -	g++ -Iinclude -o $@ $^
-+	c++ -Iinclude $(CXXFLAGS) -o $@ $^
- 
++	$(CXX) -Iinclude $(CXXFLAGS) -o $@ $^
+
  clean:
 	-rm $(EXE_NAME)
 @@ -11,7 +11,7 @@
 	tar -xf boost_1_64_0.tar.bz2
- 
+
  make_test:
 -	g++ -o test_prog test/*.cpp -I include/cajun/ -I boost_1_64_0/ -std=c++11
-+	c++ $(CXXFLAGS) -o test_prog test/*.cpp -I include/cajun/ -I boost_1_64_0/ -std=c++11
- 
++	$(CXX) $(CXXFLAGS) -o test_prog test/*.cpp -I include/cajun/ -I boost_1_64_0/ -std=c++11
+
  test: make_test
 -	./test_prog
 +	./test_prog
